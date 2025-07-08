@@ -1,0 +1,770 @@
+#!/usr/bin/env python3
+
+"""
+CISM namelist creator
+"""
+import sys, os
+from collections import OrderedDict
+
+_CIMEROOT = os.environ.get("CIMEROOT")
+if _CIMEROOT is None:
+    raise SystemExit("ERROR: must set CIMEROOT environment variable")
+
+_LIBDIR = os.path.join(_CIMEROOT, "scripts", "Tools")
+sys.path.append(_LIBDIR)
+
+from standard_script_setup import *
+from CIME.buildnml import create_namelist_infile, parse_input
+from CIME.case import Case
+from CIME.utils import expect, safe_copy
+from CIME.nmlgen import NamelistGenerator
+from CIME.XML.grids import GRID_SEP
+
+_final_template = """########################################
+# I/O configuration follows
+########################################
+
+[CF default]
+title: CISM simulation
+institution: Community Earth System Model
+
+[CF input]
+name: {filename}"""
+
+logger = logging.getLogger(__name__)
+
+#----------------------------------------------------
+# Set some important constants, such as important
+# values of certain config file parameters
+#----------------------------------------------------
+# namelist groups in the cism_in file
+_CISM_IN_GROUPS = ["cism_params", "time_manager_nml", "glc_override_nml"]
+
+# namelist groups in the cism.icesheet.config file
+_CISM_CONFIG_GROUPS = ["grid", "glad_climate", "esm_output", "options", "sigma", "time", "parameters",
+                       "grid_ocn", "ho_options", "gthf", "isostasy", "derived"]
+
+# dictionary mapping all possible ice sheet names to the names used in xml variables
+# we use an OrderedDict to get reliable ordering (this is unnecessary in python3.6 and
+# later because standard dicts maintain order, but necessary for 3.5 and earlier)
+#
+# It is important that this ordering be consistent with the ordering of grids in the
+# config_grids xml file (e.g., if the Antarctica grid is listed before the Greenland grid
+# in grids defined in that file, then Antarctica must appear before Greenland in this
+# variable).
+#
+# Problems may arise if one ice sheet's name is a prefix of another (e.g., "gris" and "grisa").
+#
+# If you add a new ice sheet here, you should also add references to the new ice sheet in
+# a number of other places, as described in the documentation here:
+#   https://escomp.github.io/cism-docs/cism-in-cesm/versions/master/html/new-icesheet.html
+_ICESHEET_OPTIONS = OrderedDict([('ais', 'ANTARCTICA'),
+                                 ('gris', 'GREENLAND')])
+
+# value of 'sigma' that signifies that values are read from a sigma section
+_SIGMA_IN_CONFIG_FILE = 2
+
+# value of 'gthf' signifying that we should calculate gthf, and thus
+# we should have a 'gthf' section
+_GTHF_CALCULATE = 2
+
+# value of 'isostasy' signifying that isostasy is enabled, and thus we
+# should have an 'isostasy' section
+_ISOSTASY_ON = 1
+
+###############################################################################
+def get_user_nl_list(case):
+###############################################################################
+    """Returns a list of user_nl_cism* files needed in this case
+
+    This function is called by CIME to stage the user_nl_cism* files in the case
+    directory.
+
+    """
+    user_nl_list = ["user_nl_cism"]
+    for icesheet in _get_icesheet_names(case):
+        user_nl_list.append("user_nl_cism_" + icesheet)
+    return user_nl_list
+
+###############################################################################
+def buildnml(case, caseroot, compname):
+###############################################################################
+    """Build the cism namelist """
+
+    # Build the component namelist
+    if compname != "cism":
+        raise AttributeError
+
+    icesheet_names = _get_icesheet_names(case)
+    glc_grid_names = _get_glc_grid_names(case)
+    _icesheet_consistency_checks(case, icesheet_names, glc_grid_names)
+
+    _initial_consistency_checks(case)
+
+    ninst = case.get_value("NINST_GLC")
+    rundir = case.get_value("RUNDIR")
+
+    # Determine configuration directory
+    confdir = os.path.join(caseroot, "Buildconf", "cismconf")
+    if not os.path.isdir(confdir):
+        os.makedirs(confdir)
+
+    # Clear out old data
+    data_list_path = os.path.join(caseroot,"Buildconf","cism.input_data_list")
+    if os.path.exists(data_list_path):
+        os.remove(data_list_path)
+
+    # Construct the namelist generator
+    nmlgen = _create_namelist_generator(case, caseroot, "namelist_definition_cism.xml")
+
+    #----------------------------------------------------
+    # Loop over instances
+    #----------------------------------------------------
+    for inst_counter in range(1, ninst+1):
+        # determine instance string
+        inst_string = ""
+        if ninst > 1:
+            inst_string = '_' + '{:04d}'.format(inst_counter)
+
+        user_nl_file = os.path.join(caseroot, "user_nl_cism" + inst_string)
+        expect(os.path.isfile(user_nl_file),
+               "Missing required user_nl_file {}".format(user_nl_file))
+
+        infile_overall = os.path.join(confdir, "namelist_overall")
+        create_namelist_infile(case, user_nl_file, infile_overall)
+        _create_cism_in(case=case,
+                        confdir=confdir,
+                        inst_string=inst_string,
+                        # need to make a copy of icesheet_names because add_default
+                        # modifies the values for some reason
+                        icesheet_names=icesheet_names[:],
+                        infile=infile_overall,
+                        nmlgen=nmlgen,
+                        data_list_path=data_list_path)
+        # Copy resolved namelist to rundir
+        if os.path.isdir(rundir):
+            file_src = os.path.join(confdir, "cism_in")
+            file_dest = os.path.join(rundir, "cism_in"+inst_string)
+            logger.debug("CISM namelist copy: file_src {} file_dest {} ".format(file_src, file_dest))
+            safe_copy(file_src,file_dest)
+
+        for idx, icesheet in enumerate(icesheet_names):
+            # If multi-instance case does not have restart file, use
+            # single-case restart for each instance
+            rpointer = "rpointer.glc." + icesheet
+            if (os.path.isfile(os.path.join(rundir,rpointer)) and
+                (not os.path.isfile(os.path.join(rundir,rpointer + inst_string)))):
+                safe_copy(os.path.join(rundir, rpointer),
+                          os.path.join(rundir, rpointer + inst_string))
+
+            user_nl_file = os.path.join(caseroot, "user_nl_cism_" + icesheet + inst_string)
+            expect(os.path.isfile(user_nl_file),
+                   "Missing required user_nl_file {}".format(user_nl_file))
+
+            infile_this_icesheet = os.path.join(confdir, "namelist_" + icesheet)
+            create_namelist_infile(case, user_nl_file, infile_this_icesheet)
+            # In _check_compset_grid_consistency, we confirmed that the ordering of ice
+            # sheets matches the ordering of grids; we make use of that consistency here:
+            glc_grid = glc_grid_names[idx]
+            _create_cism_config(case=case,
+                                confdir=confdir,
+                                inst_string=inst_string,
+                                icesheet=icesheet,
+                                glc_grid=glc_grid,
+                                infile_overall=infile_overall,
+                                infile_this_icesheet=infile_this_icesheet,
+                                nmlgen=nmlgen,
+                                data_list_path=data_list_path)
+            # Copy resolved namelist to rundir
+            if os.path.isdir(rundir):
+                file_src = os.path.join(confdir, _config_fname(icesheet))
+                file_dest = os.path.join(rundir, _config_fname(icesheet, base="cism"+inst_string))
+                logger.debug("CISM namelist copy: file_src {} file_dest {} ".format(file_src, file_dest))
+                safe_copy(file_src,file_dest)
+
+####################################################################################
+def _create_namelist_generator(case, caseroot, filename):
+####################################################################################
+    # determine directory for user modified namelist_definitions.xml and namelist_defaults.xml
+    user_xml_dir = os.path.join(caseroot, "SourceMods", "src.cism")
+    expect (os.path.isdir(user_xml_dir),
+            "user_xml_dir {} does not exist ".format(user_xml_dir))
+
+    # NOTE: User definition *replaces* existing definition.
+    glcroot = case.get_value("COMP_ROOT_DIR_GLC")
+    namelist_xml_dir = os.path.join(glcroot, "cime_config")
+    definition_file = [os.path.join(namelist_xml_dir, filename)]
+    user_definition = os.path.join(user_xml_dir, filename)
+    if os.path.isfile(user_definition):
+        definition_file = [user_definition]
+    for file_ in definition_file:
+        expect(os.path.isfile(file_), "Namelist XML file {} not found!".format(file_))
+
+    # Create the namelist generator object - independent of instance
+    nmlgen = NamelistGenerator(case, definition_file)
+    return nmlgen
+
+####################################################################################
+def _is_icesheet_present(case, icesheet_name):
+####################################################################################
+    """Returns True if the given ice sheet is present in this run, False otherwise
+
+    (This is based on the appropriate GLC_USE_* variable)
+    """
+    xmlname = _ICESHEET_OPTIONS[icesheet_name]
+    xmlvar = "GLC_USE_" + xmlname
+    return case.get_value(xmlvar)
+
+####################################################################################
+def _is_icesheet_evolving(case, icesheet_name):
+####################################################################################
+    """Returns True if the given ice sheet is evolving in this run, False otherwise
+
+    (This is based on the appropriate CISM_EVOLVE_* variable)
+    """
+    xmlname = _ICESHEET_OPTIONS[icesheet_name]
+    xmlvar = "CISM_EVOLVE_" + xmlname
+    return case.get_value(xmlvar)
+
+####################################################################################
+def _get_icesheet_names(case):
+####################################################################################
+    """Returns a list of names of the ice sheets that are active in this case
+    """
+    return [icesheet_name for icesheet_name in _ICESHEET_OPTIONS
+            if _is_icesheet_present(case, icesheet_name)]
+
+####################################################################################
+def _get_glc_grid_names(case):
+####################################################################################
+    """Returns a list of GLC grid names for this case"""
+    glc_grid = case.get_value("GLC_GRID")
+    return glc_grid.split(GRID_SEP)
+
+####################################################################################
+def _config_fname(icesheet, base="cism"):
+####################################################################################
+    """Returns the name of the cism config file for the given ice sheet"""
+    return "{}.{}.config".format(base, icesheet)
+
+####################################################################################
+def _icesheet_consistency_checks(case, icesheet_names, glc_grid_names):
+####################################################################################
+    """Run various consistency checks on the list of icesheet names & glc grid names, and related checks"""
+    expect(len(icesheet_names) > 0, "Compsets with CISM must specify at least one ice sheet")
+
+    # ------------------------------------------------------------------------
+    # Check consistency between compset and grid
+    # ------------------------------------------------------------------------
+    _check_compset_grid_consistency(case, icesheet_names, glc_grid_names)
+
+    # ------------------------------------------------------------------------
+    # Check consistency of EVOLVE settings
+    # ------------------------------------------------------------------------
+    for icesheet in _ICESHEET_OPTIONS:
+        if _is_icesheet_evolving(case, icesheet):
+            expect(_is_icesheet_present(case, icesheet),
+                   "{} set to evolve but not present in compset".format(icesheet))
+
+            expect(case.get_value("CISM_EVOLVE"),
+                   "{} set to evolve but overall CISM_EVOLVE is FALSE".format(icesheet))
+
+    if case.get_value("CISM_EVOLVE"):
+        found_evolving_icesheet = False
+        for icesheet in icesheet_names:
+            if _is_icesheet_evolving(case, icesheet):
+                found_evolving_icesheet = True
+        expect(found_evolving_icesheet,
+               "CISM_EVOLVE is TRUE, but no ice sheets are set to evolve")
+
+####################################################################################
+def _check_compset_grid_consistency(case, icesheet_names, glc_grid_names):
+####################################################################################
+    """Check consistency between the compset and the grid
+
+    Note that these checks assume that the grid name for a given ice sheet starts with
+    that ice sheet name (e.g., Greenland's grids start with 'gris').
+
+    Args:
+    - case: case object
+    - icesheet_names: list of ice sheets included in this compset; the available options
+      are the keys of _ICESHEET_OPTIONS
+    - glc_grid_names: list of glc grids (based on separating the overall GLC_GRID by the
+      grid separator)
+
+    """
+    glc_grid = case.get_value("GLC_GRID")
+
+    # ------------------------------------------------------------------------
+    # First confirm that every ice sheet in the compset is also present in the grid, and
+    # vice versa. Errors here typically indicate user error: using a grid that is
+    # inconsistent with the compset.
+    # ------------------------------------------------------------------------
+
+    for icesheet in icesheet_names:
+        grid_startswith_icesheet = [g.startswith(icesheet) for g in glc_grid_names]
+        num_matches = grid_startswith_icesheet.count(True)
+        expect(num_matches == 1,
+               "Inconsistency between compset and grid: "
+               "{} included in compset, so expect one grid starting with that name, "
+               "but found {} grids with that name in GLC_GRID {}".format(
+                   icesheet, num_matches, glc_grid))
+
+    for grid in glc_grid_names:
+        icesheet_is_prefix_of_grid = [grid.startswith(i) for i in icesheet_names]
+        num_matches = icesheet_is_prefix_of_grid.count(True)
+        expect(num_matches == 1,
+               "Inconsistency between compset and grid: "
+               "{} included in GLC_GRID, so expect it to be the grid for one ice sheet in this case, "
+               "but found {} ice sheets that are the prefix of this grid name".format(
+                   grid, num_matches))
+
+    # ------------------------------------------------------------------------
+    # Now check for consistency in ordering. Errors here typically indicate an
+    # inconsistency between the ordering defined in _ICESHEET_OPTIONS above and the
+    # ordering of the grids as defined in config_grids.xml.
+    #
+    # Given that the below checks pass, the above checks may be partly or entirely
+    # redundant. However, it is still valuable to do the above checks because we can get
+    # more meaningful errors from them, for the sake of informing the user. (If the
+    # ordering check failed without doing the above checks, we wouldn't know, for example,
+    # if the problem is that a given grid is completely absent or just in the wrong
+    # order.)
+    # ------------------------------------------------------------------------
+
+    # The checks we have already done above should only have passed if the number of ice
+    # sheets matches the number of glc grids. But to be sure, we check that here.
+    expect(len(icesheet_names) == len(glc_grid_names),
+           "Mismatch between number of ice sheets in compset ({}) "
+           "and number of glc grids in {} ({})".format(
+               len(icesheet_names), glc_grid, len(glc_grid_names)))
+
+    for idx, icesheet in enumerate(icesheet_names):
+        expect(glc_grid_names[idx].startswith(icesheet),
+               "GLC grid ordering inconsistent with expectations in CISM's buildnml: "
+               "Expect ice sheet #{} to be {}, but grid in that index is {}. "
+               "This likely indicates an inconsistency between the _ICESHEET_OPTIONS "
+               "defined in CISM's buildnml and the ordering of the grids as defined in "
+               "CIME's config_grids.xml file.".format(
+                   # we print idx+1 rather than idx so that we're using 1-based instead of 0-based counting
+                   idx+1, icesheet, glc_grid_names[idx]))
+
+####################################################################################
+def _create_cism_in(case, confdir, inst_string, icesheet_names, infile, nmlgen, data_list_path):
+####################################################################################
+    """Write the cism_in file
+
+    Most arguments are the same as those for `NamelistGenerator`. The `inst_string`
+    argument is used as a suffix to distinguish files for different instances. The
+    `icesheet_names` argument gives the list of names of the ice sheets for which we're
+    creating a namelist.  The `confdir` argument is used to specify the directory in which
+    output files will be placed.
+    """
+    # ------------------------------------------------------------------------
+    # Create config dictionary
+    # ------------------------------------------------------------------------
+    config = {}
+    # Note that the cism_evolve value used in cism_in is the overall CISM_EVOLVE, which is
+    # true if *any* ice sheet is evolving.
+    config['cism_evolve'] = '.true.' if case.get_value('CISM_EVOLVE') else '.false.'
+    config['calendar'] = case.get_value("CALENDAR")
+
+    run_type = _get_effective_run_type(case)
+
+    # To avoid errors with the user_nl_cism file, nmlgen needs to contain all of the
+    # groups from both cism_in and cism.icesheet.config. However, for the sake of the
+    # cism_in file, we can avoid doing the work of adding the defaults for the
+    # cism.icesheet.config groups.
+    nmlgen.init_defaults([infile], config,
+                         skip_default_for_groups=_CISM_CONFIG_GROUPS+["glc_override_nml"])
+
+    nmlgen.add_default("paramfile_base", value="cism"+inst_string, ignore_abs_path=True)
+    nmlgen.add_default("num_icesheets", value=len(icesheet_names))
+    nmlgen.add_default("icesheet_names", value=icesheet_names)
+
+    _set_startdate(nmlgen, case,
+                   run_type=run_type)
+
+    _set_glc_dt(nmlgen,
+                ncpl_base_period=case.get_value("NCPL_BASE_PERIOD"),
+                glc_ncpl=case.get_value("GLC_NCPL"))
+
+    #----------------------------------------------------
+    # Set values for sections that are added conditionally and write file
+    #----------------------------------------------------
+
+    if _value_is_true(nmlgen.get_value("enable_frac_overrides")):
+        nmlgen.add_defaults_for_group("glc_override_nml")
+    else:
+        nmlgen.confirm_group_is_empty(
+            "glc_override_nml",
+            "items in glc_override_nml can only be set if enable_frac_overrides is set to .true.")
+
+    groups = _CISM_IN_GROUPS
+    output_file = os.path.join(confdir, "cism_in")
+    nmlgen.write_output_file(output_file, data_list_path, groups=groups, sorted_groups=False)
+
+####################################################################################
+def _create_cism_config(case, confdir, inst_string, icesheet, glc_grid,
+                        infile_overall, infile_this_icesheet, nmlgen, data_list_path):
+####################################################################################
+    """Write the cism.icesheet.config file for the given ice sheet
+
+    The `inst_string` argument is used as a suffix to distinguish files for different
+    instances. The `icesheet` argument gives the name of the ice sheet for which we're
+    creating a namelist. The `confdir` argument is used to specify the directory in which
+    output files will be placed.
+
+    Note that glc_grid is the grid name for *this* ice sheet (not the full GLC_GRID
+    variable, which gives the grid names for all ice sheets present in this case).
+
+    infile_overall gives the path to the namelist file that applies to all ice sheets;
+    infile_this_icesheet gives the path to the namelist file that contains settings
+    specific to this ice sheet.
+
+    """
+    #----------------------------------------------------
+    # Create config dictionary
+    #----------------------------------------------------
+    config = {}
+    config['icesheet'] = icesheet
+    config['glc_grid']  = glc_grid
+    config['cism_phys'] = case.get_value("CISM_PHYS")
+    if case.get_value('GLC_TWO_WAY_COUPLING'):
+        config['glc_two_way_coupling'] = '.true.'
+    else:
+        config['glc_two_way_coupling'] = '.false.'
+    if _is_icesheet_evolving(case, icesheet):
+        config['cism_evolve_this_icesheet'] = '.true.'
+    else:
+        config['cism_evolve_this_icesheet'] = '.false.'
+
+    cism_observed_ic = case.get_value("CISM_OBSERVED_IC")
+
+    run_type = _get_effective_run_type(case)
+
+    #----------------------------------------------------
+    # Initialize namelist defaults
+    #----------------------------------------------------
+    # Use settings from both the overall user_nl_cism and the icesheet-specific
+    # user_nl_cism_icesheet files. The icesheet-specific file is given first so that it
+    # takes precedence over the general file, in case the same setting is given in both.
+    #
+    # To avoid errors with the user_nl_cism file, nmlgen needs to contain all of the
+    # groups from both cism_in and cism.icesheet.config. However, for the sake of the
+    # cism.icesheet.config file, we can avoid doing the work of adding the defaults for
+    # the cism_in groups.
+    nmlgen.init_defaults([infile_this_icesheet, infile_overall], config,
+                         skip_default_for_groups=_CISM_IN_GROUPS+["gthf",
+                                                                  "isostasy",
+                                                                  "sigma"])
+
+    _set_restart_options(nmlgen, case,
+                         icesheet=icesheet,
+                         run_type=run_type,
+                         cism_observed_ic=cism_observed_ic,
+                         inst_string=inst_string)
+
+    #----------------------------------------------------
+    # Set values for sections that are added conditionally and write file
+    #----------------------------------------------------
+    output_file = os.path.join(confdir, _config_fname(icesheet))
+    # This initial write doesn't actually write any values (due to specifying
+    # "groups=[]"). However, it still performs two functions: (1) validation; (2) writing
+    # to the input data list file.
+    nmlgen.write_output_file(output_file, data_list_path, groups=[])
+    _update_cism_config(nmlgen, output_file, mode="w", header="grid", group="grid")
+    _update_cism_config(nmlgen, output_file, mode="a", header="GLAD climate", group="glad_climate")
+    _update_cism_config(nmlgen, output_file, mode="a", header="esm_output", group="esm_output")
+    _update_cism_config(nmlgen, output_file, mode="a", header="options", group="options")
+    _add_conditional_section_to_cism_config(nmlgen, output_file, group="sigma",
+                                            control_var="sigma",
+                                            value_for_addition=_SIGMA_IN_CONFIG_FILE)
+    _update_cism_config(nmlgen, output_file, mode="a", header="time", group="time")
+    _update_cism_config(nmlgen, output_file, mode="a", header="parameters", group="parameters")
+    _update_cism_config(nmlgen, output_file, mode="a", header="ho_options", group="ho_options")
+    _add_conditional_section_to_cism_config(nmlgen, output_file, group="gthf",
+                                            control_var="gthf",
+                                            value_for_addition=_GTHF_CALCULATE)
+    _add_conditional_section_to_cism_config(nmlgen, output_file, group="isostasy",
+                                            control_var="isostasy",
+                                            value_for_addition=_ISOSTASY_ON)
+    _update_cism_config(nmlgen, output_file, mode="a", header="grid_ocn", group="grid_ocn")
+
+    final_text = _final_template.format(filename=nmlgen.get_value('cisminputfile'))
+    with open(output_file, "a") as file_obj:
+        file_obj.write("{}\n".format(final_text))
+
+    # ------------------------------------------------------------------------
+    # Final consistency checks
+    # ------------------------------------------------------------------------
+    _cism_config_final_consistency_checks(nmlgen, icesheet)
+
+###############################################################################
+def _initial_consistency_checks(case):
+###############################################################################
+    calendar = case.get_value("CALENDAR")
+    if calendar != "NO_LEAP":
+        # See https://github.com/ESCOMP/CISM-wrapper/issues/1
+        errmsg = """\
+CISM currently only supports a NO_LEAP calendar.
+Either change the calendar to NO_LEAP or create a case without CISM.
+(For the latter, you can use SGLC in place of CISM if you don't care about ice evolution.
+Besides not getting CISM diagnostics, this will just result in slightly different glacier
+cover in CLM.)"""
+        print(errmsg)
+        expect(False, "CISM currently only supports a NO_LEAP calendar")
+
+###############################################################################
+def _get_effective_run_type(case):
+###############################################################################
+    run_type = case.get_value("RUN_TYPE")
+
+    comp_interface = case.get_value("COMP_INTERFACE")
+    cism_evolve = case.get_value("CISM_EVOLVE")
+    # NOTE: with the nuopc interface, the CISM run phase is never called when running in
+    # noevolve mode, so a restart file will never be written for cism - only initial
+    # information will be sent back to CTSM. Since we don't have a restart file to start
+    # from, we need to tell CISM to start in startup mode in this situation.
+    #
+    # Note that this looks at the overall cism_evolve, which is only False if no ice
+    # sheets are evolving: In the situation where one ice sheet is evolving but another is
+    # not, the overall cism_evolve will be True and restart files will still be written
+    # for every ice sheet (even non-evolving ones), so we can safely restart from these
+    # restart files (so we do not need to force run_type to "startup"). (Also note that,
+    # because all ice sheets share a single time manager in the CISM-wrapper layer, it
+    # might currently be awkward or impossible for one ice sheet to start in startup mode
+    # and another to start in branch mode, for example.)
+    if (comp_interface == 'nuopc' and not cism_evolve):
+        logger.debug("Interface is nuopc, cism is not evolving: CISM run_type is always startup")
+        run_type = "startup"
+
+    return run_type
+
+###############################################################################
+def _set_restart_options(nmlgen, case, icesheet, run_type, cism_observed_ic,
+                         inst_string):
+###############################################################################
+    """
+    Sets defaults for variables related to restart in cism_in
+
+    Args:
+    - nmlgen: nmlgen instance
+    - case: case instance
+    - icesheet: name of this ice sheet
+    - run_type: string - 'startup', 'hybrid' or 'branch'
+    - cism_observed_ic: logical
+    - inst_string: string
+    """
+    if run_type == 'startup':
+        restart = 0
+    elif _value_is_true(cism_observed_ic):
+        if run_type == 'branch':
+            expect(False,"CISM_OBSERVED_IC=TRUE not allowed for branch runs - only for hybrid runs")
+        else:
+            restart = 0
+    elif run_type == 'hybrid' and not case.get_value('CISM_EVOLVE'):
+        # We could use the hybrid refcase's CISM restart file in this case. However, we
+        # often run into problems where a change in CISM makes it incompatible with old
+        # restart files, and this breaks configurations that are set up as hybrid runs
+        # (typically B and F compsets). Those hybrid cases typically use NOEVOLVE (i.e.,
+        # CISM_EVOLVE=FALSE), where the restart file really doesn't matter. So, rather
+        # than requiring ourselves to recreate all of those refcases whenever we break
+        # compatibility with old restart files, an easier-to-maintain solution is to just
+        # use observed initial conditions rather than the restart file whenever we're
+        # running a hybrid case with CISM_EVOLVE=FALSE.
+        #
+        # One theoretical problem with this is: If someone did a run with
+        # CISM_EVOLVE=TRUE, then did a hybrid case off of that with CISM_EVOLVE=FALSE,
+        # hoping that this would keep the ice sheet fixed at the previously-spun-up state,
+        # they wouldn't get what they want: instead the ice sheet would be reset to
+        # observed initial conditions. Thus, the user would need to explicitly set
+        # 'cisminputfile' and 'restart' in this case.
+        #
+        # Note that this logic is based on the overall CISM_EVOLVE, so it is not triggered
+        # if one ice sheet is evolving but another is not. Also note that this logic is
+        # currently redundant with the NUOPC-specific logic that sets run_type to
+        # "startup" if CISM_EVOLVE is FALSE (in _get_effective_run_type). But we're
+        # keeping this redundancy for the sake of MCT runs and in case the NUOPC-specific
+        # logic is ever changed.
+        restart = 0
+    elif run_type == 'branch' or run_type == 'hybrid':
+        run_refcase = case.get_value('RUN_REFCASE')
+        run_refdate = case.get_value('RUN_REFDATE')
+        rundir = case.get_value('RUNDIR')
+        filename = "{refcase}.cism{inst_string}.{icesheet}.r.{refdate}-00000.nc".format(
+            refcase=run_refcase, inst_string=inst_string,
+            icesheet=icesheet, refdate=run_refdate)
+        if not os.path.exists(os.path.join(rundir, filename)):
+            # If the version with INST_STRING doesn't exist, try without INST_STRING. This
+            # is needed when starting a multi-instance case from a single-instance
+            # refcase.
+            filename = "{refcase}.cism.{icesheet}.r.{refdate}-00000.nc".format(
+                refcase=run_refcase,
+                icesheet=icesheet, refdate=run_refdate)
+
+        nmlgen.add_default('cisminputfile', filename, ignore_abs_path=True)
+        restart = 1
+    else:
+        expect(False, "Unknown RUN_TYPE: {} ".format(run_type))
+
+    nmlgen.add_default('restart', value=restart)
+    if restart == 0:
+        nmlgen.add_default('cisminputfile')
+
+###############################################################################
+def _set_startdate(nmlgen, case, run_type):
+###############################################################################
+    """
+    Sets defaults for variables related to start date & time in cism_in
+    """
+    if run_type == 'branch':
+        startdate = case.get_value("RUN_REFDATE")
+    else:
+        startdate = case.get_value("RUN_STARTDATE")
+    date_array = startdate.split('-')
+    nmlgen.add_default("iyear0"  , value=int(date_array[0]))
+    nmlgen.add_default("imonth0" , value=int(date_array[1]))
+    nmlgen.add_default("iday0"   , value=int(date_array[2]))
+    nmlgen.add_default("ihour0"  , value=0)
+    nmlgen.add_default("iminute0", value=0)
+    nmlgen.add_default("isecond0", value=0)
+
+###############################################################################
+def _set_glc_dt(nmlgen, ncpl_base_period, glc_ncpl):
+###############################################################################
+    """
+    Sets defaults for dt-related values in cism_in (NOT the values in cism.icesheet.config)
+    """
+    # The logic here assumes that we want one timestep per coupling interval
+    if ncpl_base_period == 'hour':
+        if 3600 % glc_ncpl != 0:
+            expect(False, "glc_ncpl {} doesn't divide an hour evenly".format(glc_ncpl))
+        dt_option = "seconds"
+        dt_count = 3600 / glc_ncpl
+    elif ncpl_base_period == 'day':
+        dt_option = "steps_per_day"
+        dt_count = glc_ncpl
+    elif ncpl_base_period == 'year':
+        dt_option = "steps_per_year"
+        dt_count = glc_ncpl
+    elif ncpl_base_period == 'decade':
+        dt_option = "steps_per_year"
+        dt_count = glc_ncpl / 10
+    else:
+        expect(False, "invalid NCPL_BASE_PERIOD {}".format(ncpl_base_period))
+
+    nmlgen.add_default("dt_option", value=dt_option)
+    nmlgen.add_default("dt_count", value=dt_count)
+
+###############################################################################
+def _update_cism_config(nmlgen, output_file, mode, header, group):
+###############################################################################
+    """Append an entry to the cism.icesheet.config file"""
+    with open(output_file, mode) as file_obj:
+        file_obj.write("[{}]\n".format(header))
+    nmlgen.add_nmlcontents(output_file, group=group, sorted_groups=False)
+
+###############################################################################
+def _add_conditional_section_to_cism_config(nmlgen, output_file, group,
+                                            control_var, value_for_addition):
+###############################################################################
+    """Add a section to the cism.icesheet.config file conditionally
+
+    Args:
+    nmlgen: the nmlgen object
+    output_file: path to output file
+    group: name of group to add conditionally; assumed to be the same as the header for
+           the section
+    control_var: name of variable in nmlgen that controls whether to add this section
+    value_for_addition: int - add the section if control_var is equal to this value
+    """
+    if int(nmlgen.get_value(control_var)) == value_for_addition:
+        nmlgen.add_defaults_for_group(group)
+        _update_cism_config(nmlgen, output_file, mode="a", header=group, group=group)
+    else:
+        errmsg = "items in {} section can only be set if {} is set to {}".format(
+            group, control_var, value_for_addition)
+        nmlgen.confirm_group_is_empty(group, errmsg)
+
+###############################################################################
+def _cism_config_final_consistency_checks(nmlgen, icesheet):
+###############################################################################
+    num_errors = 0
+    num_errors += _check_cism_dt(float(nmlgen.get_value("dt")), icesheet)
+
+    if int(nmlgen.get_value("evolve_ice")) == 0:
+        if _value_is_false(nmlgen.get_value("zero_gcm_fluxes")):
+            errmsg = """\
+ERROR for ice sheet {}:
+For evolve_ice = 0 (set from CISM_EVOLVE_ICESHEET for this icesheet),
+zero_gcm_fluxes must be set to .true.
+(This is because evolve_ice = 0 implies that there will be no fluxes,
+and so zero_gcm_fluxes must also be set to .true. for the sake of logic
+that depends on whether these fluxes will be zero - particularly, the creation
+of icemask_coupled_fluxes used by CTSM).""".format(icesheet)
+            print(errmsg)
+            num_errors += 1
+
+    expect(num_errors == 0, "Errors in cism.{}.config final consistency checks (see above)".format(icesheet))
+
+###############################################################################
+def _check_cism_dt(dt, icesheet):
+###############################################################################
+    """Checks CISM's dt value: i.e., the dt variable in the time section of cism.icesheet.config
+
+    Returns 0 if okay, > 0 if errors found (i.e., if dt is an inappropriate value). Also,
+    if any errors are found, an error message is printed.
+    """
+    num_errors = 0
+
+    # Ensure that dt translates into an integer number of hours
+    dt_hours = dt * 365 * 24
+    dt_hours_int = round(dt_hours)
+    # make sure the difference is basically 0, by comparing relative difference with a
+    # value near machine epsilon
+    if (abs(dt_hours - dt_hours_int)/dt_hours > 1e-15):
+        errmsg = """\
+ERROR for ice sheet {}:
+dt (in years) must translate into an integer number of hours
+dt = {}
+dt (hours) = {}""".format(icesheet, dt, dt_hours)
+        print(errmsg)
+        num_errors += 1
+
+    return num_errors
+
+###############################################################################
+def _value_is_true(value):
+###############################################################################
+    """Returns True if the given value is some form of true; otherwise returns False
+    
+    value can be a logical (True/False) or a Fortran variable ('.true.' or '.false.',
+    case-insensitive)
+    """
+    if isinstance(value, bool):
+        return value
+    elif isinstance(value, str):
+        if value.lower() == ".true.":
+            return True
+        elif value.lower() == ".false.":
+            return False
+        else:
+            raise ValueError("Expected Fortran logical, got: {}".format(value))
+    else:
+        raise ValueError("Cannot interpret value as logical: {}".format(value))
+
+###############################################################################
+def _value_is_false(value):
+###############################################################################
+    return not _value_is_true(value)
+
+###############################################################################
+def _main_func():
+
+    caseroot = parse_input(sys.argv)
+    with Case(caseroot) as case:
+        buildnml(case, caseroot, "cism")
+
+if __name__ == "__main__":
+    _main_func()

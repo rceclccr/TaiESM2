@@ -1,0 +1,84 @@
+{
+	   sprintf(path,"%dcvt.data",mol[iMol].iso);
+	   if( (stat_ret=stat(path,&buf_stat)) != 0 )
+	   {
+	    sprintf(path,"%s/data/default/%d/cvt.data",data_root,mol[iMol].iso);
+	    printf("\nNCVT: file=%dcvt.data doesn't exist, will use default\n%s\n",
+	          mol[iMol].iso,path);
+	   }
+	   else
+	   {
+	    printf("\nNCVT: file=%dcvt.data exists, will use it.\n",
+	          mol[iMol].iso);
+	   }
+
+	   stream=fopen(path,"r");
+	   if(!stream)
+	   {
+	    printf("Can't find cvt data:%s\nExiting...\n",
+	            path);
+	    exit(1);
+	   }
+
+	   while(fgets(buf,BUFSIZ,stream) !=NULL)
+	   {
+	    if( buf[0] == '#' ) continue;
+
+	    sscanf_ret=sscanf(addrbuf,"%d %d -> %d %d %lf %d",
+	                    &iso_name,&iu,&il,&group,&dmulti,&partner);
+	    if( 
+	       ( sscanf_ret !=     6 ) 
+	      ) 
+	    {
+	     printf("NCVT:Malformed input string:see below\n--->%s",buf);
+	     continue;
+	    }
+
+	    if( 
+	       ( mol[iMol].iso != iso_name ) 
+	      ) 
+	    {
+	     printf("NCVT: iso=%d != iso_name=%d\n",
+	             mol[iMol].iso,iso_name);
+	     continue;
+	    }
+
+            ivu=is_level_in_problem(mol,iMol,v_level,iu);
+	    if (ivu < 0 ) continue;
+
+            ivl=is_level_in_problem(mol,iMol,v_level,il);
+	    if (ivl < 0 ) continue;
+
+	    if ( ivu <= ivl )
+	    {
+	     printf("NCVT:Dropped input data: U <= L\n--->%s",buf);
+	     continue;
+	    }
+
+            if(mol_in_the_problem(partner,mol,pars))
+            {
+             printf ("NCVT:icvt=%5d MOL=%3d U=%5.5d L=%5.5d dmulti=%12.6e group=%3d partner=%2d\n",
+	   	  icvt,
+	   	  v_level[ivu].iso,
+	   	  v_level[ivu].name,
+	   	  v_level[ivl].name,
+	   	  dmulti,
+	   	  group,
+                  partner);
+
+	     cvt_band=(BAND_CVT *) realloc(cvt_band,(icvt+1)*sizeof(BAND_CVT));
+	     CHECK_PTR(cvt_band);
+	     cvt_band[icvt].mole=iMol;
+	     cvt_band[icvt].ivu_index=ivu;
+	     cvt_band[icvt].ivl_index=ivl;
+	     cvt_band[icvt].partner=partner;
+	     cvt_band[icvt].group=mol[iMol].hitnumber*100+group;
+	     cvt_band[icvt].alt_indep=dmulti;
+	     cvt_band[icvt].alt_dep=1;
+	     icvt++;
+            }
+	   }
+           
+	   fclose(stream);
+
+}

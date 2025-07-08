@@ -1,0 +1,123 @@
+
+#include <functions.h>
+#include <math.h>
+#include <constants.h>
+
+double voigt(double x, double a)
+{
+    /* Initialized data */
+
+    const double q1 = 9.42477796076938;
+    const double q2 = .564189583547756;
+
+    /* System generated locals */
+    double ret_val;
+
+
+    /* Local variables */
+    double e;
+    int n;
+    double s, t, a1, a2, b1, b2, zi, zr;
+
+ const double c[31]= { .1247047935472376E-11,
+ .3128070109086391E-10,
+ .6282896767437440E-09,
+ .1010493408284227E-07,
+ .1301359122498152E-06,
+ .1341995167425942E-05,
+ .1108140577897870E-04,
+ .7327045349487609E-04,
+ .3879296870220482E-03,
+ .1644626438955778E-02,
+ .5583051506439079E-02,
+ .1517630745730424E-01,
+ .3303320506449692E-01,
+ .5757387036061600E-01,
+ .8035080883557143E-01,
+ .8979356106258329E-01,
+ .8035080883557143E-01,
+ .5757387036061600E-01,
+ .3303320506449692E-01,
+ .1517630745730424E-01,
+ .5583051506439079E-02,
+ .1644626438955778E-02,
+ .3879296870220482E-03,
+ .7327045349487609E-04,
+ .1108140577897870E-04,
+ .1341995167425942E-05,
+ .1301359122498152E-06,
+ .1010493408284227E-07,
+ .6282896767437440E-09,
+ .3128070109086391E-10,
+ .1247047935472376E-11}
+;
+    if (a == 0.) {
+	goto L106;
+    }
+/*     CALCULATION FOR THE GENERAL CASE */
+    a1 = a * 3.;
+    a2 = a * a;
+    e = exp(-q1 * a);
+    if (a < .1) {
+	goto L101;
+    }
+    zr = e * cos(q1 * x);
+    zi = e * sin(q1 * x);
+    ret_val = 0.;
+    goto L102;
+L101:
+    zr = (e + 1. / e) * .5 * cos(q1 * x);
+    zi = (e - 1. / e) * .5 * sin(q1 * x);
+    ret_val = q2 * exp(a2 - x * x) * cos(a * 2. * x);
+L102:
+    b1 = (1. - zr) * a * 1.5;
+    b2 = -zi;
+    s = -8. - x * 1.5;
+    t = s * s + a2 * 2.25;
+    for (n = 1; n <= 31; ++n) {
+	t = t + s + .25;
+	s += .5;
+	b1 = a1 - b1;
+	b2 = -b2;
+	if (t > 2.5e-12) {
+	    goto L103;
+	}
+	ret_val -= c[n - 1] * a * 29.608813203268;
+	goto L104;
+L103:
+	ret_val += c[n - 1] * (b1 + b2 * s) / t;
+L104:
+	;
+    }
+L105:
+    return ret_val;
+/*     CALCULATION FOR A=0 */
+L106:
+    ret_val = q2 * exp(-(x) * x);
+    goto L105;
+} /* voigt */
+
+double doppler(double x)
+{
+    /* Initialized data */
+
+    const double q2 = .564189583547756;
+
+/*     CALCULATION FOR A=0 */
+
+    return (q2 * exp(-(x) * x));
+ 
+} 
+#if 0
+double voigt_appr(double x, double a)
+{
+ double dum,csi,eta,eta2;
+ 	dum=a+sqrt(a*a+4*M_LN2);
+ 	csi=2.0/(dum/a+(2*a/dum)/10.0);
+ 	eta=csi*x*a;
+ 	eta2=eta*eta;
+ return ( csi/a*(sqrt(M_LN2/M_PI)*(1-csi)*exp(-M_LN2*eta2)+
+          csi/M_PI/(1.0+eta2)-csi*(1.0-csi)/M_PI*(3.0/2.0/M_LN2+1.0+csi)*
+          (0.066*exp(-0.4*eta2)-1.0/(40.0-5.5*eta2+eta2*eta2))) );
+}
+#endif

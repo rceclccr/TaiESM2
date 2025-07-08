@@ -1,0 +1,7 @@
+*.o
+*.a
+*.mod
+Makefile.conf
+config.h
+config.log
+config.status

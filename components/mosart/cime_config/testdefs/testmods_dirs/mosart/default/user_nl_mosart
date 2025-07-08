@@ -1,0 +1,4 @@
+! ice_runoff  = .true.
+  ndens     = 1,1,1
+  nhtfrq    =-24,-8
+  mfilt     = 1,1

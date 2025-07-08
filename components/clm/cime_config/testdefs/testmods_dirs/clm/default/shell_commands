@@ -1,0 +1,3 @@
+#!/bin/bash
+
+./xmlchange CLM_BLDNML_OPTS="-fire_emis" --append

@@ -1,0 +1,14 @@
+# generated local files
+*.log
+
+# editor files
+*~
+*.bak
+
+# generated python files
+*.pyc
+__pycache__
+
+# ignore for the merge to master and orphaning of the gh-pages branch
+*.nc
+components/clm/doc/

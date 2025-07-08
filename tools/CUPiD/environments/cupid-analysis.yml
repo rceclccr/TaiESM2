@@ -1,0 +1,30 @@
+name: cupid-analysis
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - cartopy
+  - cftime
+  - dask
+  - distributed
+  - geocat-comp
+  - geopandas
+  - intake
+  - intake-esm
+  - intake-xarray
+  - ipykernel
+  - matplotlib
+  - nc-time-axis
+  - ncar-jobqueue
+  - netcdf4
+  - numpy
+  - pip
+  - python==3.11.4
+  - uxarray
+  - xarray
+  - xesmf
+  - yaml
+  - zarr
+  - pip:
+    - -e ../externals/mom6-tools
+    - git+https://github.com/rubisco-sfa/ILAMB.git

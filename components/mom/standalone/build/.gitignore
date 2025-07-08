@@ -1,0 +1,6 @@
+intel/
+intel-*/
+gnu/
+gnu-*/
+nvhpc/
+nvhpc-*/

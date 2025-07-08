@@ -1,0 +1,57 @@
+===============================================================================
+Tag Creator: altuntas
+Developers:  altuntas
+Tag Date:    19 Apr 2021
+Tag Name:    fi_20210419
+
+FMS_interface Updates Summary:
+- Fix FMS build for Python 3.6+
+- Update constants.F90 src_override for new FMS tag.
+
+Testing: aux_mom, cheyenne, b4b
+
+===============================================================================
+Tag Creator: altuntas
+Developers:  altuntas
+Tag Date:    14 Apr 2021
+Tag Name:    fi_20210414
+
+FMS_interface Updates Summary:
+- update fms source tag to 2020.04.03
+
+Testing: aux_mom, cheyenne, b4b
+
+===============================================================================
+Tag Creator: altuntas
+Developers:  altuntas
+Tag Date:    12 Nov 2020
+Tag Name:    fi_20201112
+
+FMS_interface Updates Summary:
+- update fms source tag to 2019.01.03
+
+Testing: aux_mom, cheyenne, b4b (altuntas)
+also, b4b with the FV3 1 degree test (jtruesdal)
+
+===============================================================================
+Tag Creator: altuntas
+Developers:  altuntas
+Tag Date:    21 Feb 2020
+Tag Name:    fi_20200221
+
+FMS_interface Updates Summary:
+- Fixes intel debug mode by adding -check nopointer flag
+- Fixes gnu build: adds -fcray-pointer -fdefault-double-8 -w
+
+Testing: aux_mom, cheyenne, b4b
+
+===============================================================================
+Tag Creator: altuntas
+Developers:  altuntas
+Tag Date:    20 Aug 2019
+Tag Name:    fi_20190820
+
+FMS_interface Updates Summary:
+- Added ChangeLog file.
+
+Testing: n/a

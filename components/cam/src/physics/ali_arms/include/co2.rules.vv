@@ -1,0 +1,160 @@
+	for(iMol1=0;iMol1<NMOL;iMol1++)
+	{
+	 MOL1=mol[iMol1].hitnumber;
+	 IVU1=mol[iMol1].ivu_index;
+	 IVL1=mol[iMol1].ivl_index;
+
+	 for(iMol2=iMol1;iMol2<NMOL;iMol2++)
+	 {
+	   /*
+            */
+	    
+	  MOL2=mol[iMol2].hitnumber;
+	  IVU2=mol[iMol2].ivu_index;
+	  IVL2=mol[iMol2].ivl_index;
+	  
+	  for(iu1=IVL1+1;iu1<=IVU1;iu1++)
+	   for(il1=IVL1;il1<iu1;il1++)
+	   {
+	    if (iu1 == il1) continue;
+	    EU1=v_level[iu1].energy;
+	    EL1=v_level[il1].energy;
+	    ivu1=v_level[iu1].name;
+	    ivl1=v_level[il1].name;
+
+	    for(iu2=IVL2+1;iu2<=IVU2;iu2++)
+	     for(il2=IVL2;il2<iu2;il2++)
+	     {
+	      if (iu2 == il2) continue;
+	      EU2=v_level[iu2].energy;
+	      EL2=v_level[il2].energy;
+	      ivu2=v_level[iu2].name;
+	      ivl2=v_level[il2].name;
+
+
+	      if (
+	          ( MOL1 == MOL_CO2 ) &&
+	          ( MOL2 == MOL_CO2 )
+	         )
+	      {
+
+	      /*
+	       * VV.
+	       */
+
+	       if(
+	          ( CO2_N(ivu2)  == CO2_N(ivl2)+1       ) && 
+	          ( abs(CO2_L(ivu2)-CO2_L(ivl2)) == 1   ) && 
+	          ( CO2_V3(ivu2) == CO2_V3(ivl2)        ) &&
+		  ( ivl1         ==      1              ) &&
+		  ( ivu1         ==   1101              ) && /* 626 only */
+                  ( mol[iMol1].iso == 626          )
+	         )
+	       {
+		if (
+		    (mol[iMol2].iso == 626) &&
+		    (ivu2 == 1101)   &&
+		    (ivl2 ==    1)
+		   ) goto next1;
+		SORT_ON_E2;
+	        cvv_band[icvv].group=10; /* 10 process groups enumeration */ 
+	        cvv_band[icvv].alt_indep=
+	         find_debye(iMol2,ivu2,ivl2,mol,deb,pars)/RPR42;
+	        icvv++;
+#ifdef PRINT  	        
+		printf("init_CVV:#4 ISO1=%3.3d ISO2=%3.3d IVU1=%5.5d IVL1=%5.5d IVU2=%5.5d IVL2=%5.5d\n",
+  	                mol[iMol1].iso,mol[iMol2].iso,
+  	                ivu1,ivl1,ivu2,ivl2);
+#endif	       
+	       }	       
+next1: {} 
+               if(
+                  ( CO2_N(ivu2)  == CO2_N(ivl2)         ) &&
+                  ( CO2_L(ivu2)  == CO2_L(ivl2)         ) &&
+                  ( CO2_V3(ivu2) == CO2_V3(ivl2)+1      ) &&
+                  ( ivl1         ==      1              ) &&
+                  ( ivu1         ==     11              ) && /* 626 only */
+                  ( mol[iMol1].iso == 626               )
+                 )
+               {
+                if (
+                    (mol[iMol2].iso == 626) &&
+                    (ivu2 ==   11)   &&
+                    (ivl2 ==    1)
+                   ) goto next2;
+                SORT_ON_E2;
+                cvv_band[icvv].group=9; /* process groups */
+                cvv_band[icvv].alt_indep=CO2_V3(ivu2);
+                icvv++;
+#ifdef PRINT                
+		printf("init_CVV:#1 ISO1=%3.3d ISO2=%3.3d IVU1=%5.5d IVL1=%5.5d IVU2=%5.5d IVL2=%5.5d\n",
+                        mol[iMol1].iso,mol[iMol2].iso,
+                        ivu1,ivl1,ivu2,ivl2);
+#endif               
+	       }
+next2:  {}
+	       
+	      }
+	      if (
+	          ( MOL1 == MOL_CO2 ) &&
+	          ( MOL2 == MOL_N2  )
+	         )
+	      {
+               /*
+                * VV
+                */
+                
+	       if(
+	          ( CO2_N(ivu1)  == CO2_N(ivl1)         ) && 
+	          ( CO2_L(ivu1)  == CO2_L(ivl1)         ) && 
+	          ( CO2_V3(ivu1) == CO2_V3(ivl1)+1      ) &&
+	          ( CO2_M(ivu1)  == CO2_M(ivl1)         ) && 
+		  ( ivl2         == 0                   ) &&
+		  ( ivu2         == 1                   )
+	         )
+	       {
+		SORT_ON_E2;
+	        cvv_band[icvv].group=2; /* 10 process groups enumeration */ 
+	        cvv_band[icvv].alt_indep=CO2_V3(ivu1);
+	        icvv++;
+#ifdef PRINT  	        
+		printf("init_CVV:#2 ISO1=%3.3d ISO2=%3.3d IVU1=%5.5d IVL1=%5.5d IVU2=%5.5d IVL2=%5.5d\n",
+  	                mol[iMol1].iso,mol[iMol2].iso,
+  	                ivu1,ivl1,ivu2,ivl2);
+#endif	       
+	       }	       
+	       
+	      }
+
+	      if (
+	          ( MOL1 == MOL_CO2 ) &&
+	          ( MOL2 == MOL_CO  )
+	         )
+	      {
+               /*
+                * VV
+                */
+                
+	       if(
+	          ( CO2_N(ivu1)  == CO2_N(ivl1)         ) && 
+	          ( CO2_L(ivu1)  == CO2_L(ivl1)         ) && 
+	          ( CO2_V3(ivu1) == CO2_V3(ivl1)+1      ) &&
+	          ( CO2_M(ivu1)  == CO2_M(ivl1)         ) && 
+		  ( ivu2         == ivl2+1              )
+	         )
+	       {
+		SORT_ON_E2;
+	        cvv_band[icvv].group=10006; /* process groups enumeration */ 
+	        cvv_band[icvv].alt_indep=CO2_V3(ivu1)*ivu2;
+	        icvv++;
+#ifdef PRINT  	        
+		printf("init_CVV:#10006 ISO1=%3.3d ISO2=%3.3d IVU1=%5.5d IVL1=%5.5d IVU2=%5.5d IVL2=%5.5d\n",
+  	                mol[iMol1].iso,mol[iMol2].iso,
+  	                ivu1,ivl1,ivu2,ivl2);
+#endif	       
+	       }
+	      }
+	     } 
+	   }
+	 }	 
+	}

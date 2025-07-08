@@ -1,0 +1,393 @@
+	  for(iu=IVL+1;iu<=IVU;iu++)
+	   for(il=IVL;il<iu;il++)
+	   {
+	    ivu=v_level[iu].name;
+	    ivl=v_level[il].name;
+	    EU=v_level[iu].energy;
+	    EL=v_level[il].energy;
+	    if(CO2_L(ivl))
+	     STWT=2;
+	    else
+	     STWT=1;
+
+         /*
+          * CO2 - VT1:
+          * dn=1
+          */
+
+	     if(
+	       ( CO2_N(ivu)  == CO2_N(ivl)-1     ) &&
+	       ( CO2_V3(ivu) == CO2_V3(ivl)+1    )
+	       )
+	      {
+               if(mol_in_the_problem(MOL_N2,mol,pars))
+	       {
+	        SORT_ON_E;
+	        cvt_band[icvt].partner=MOL_N2;
+	        cvt_band[icvt].group=CO2_GROUP_0+1; /* process groups enumeration */
+	        cvt_band[icvt].alt_indep=
+	         CO2_V3(ivu)*PROBDN(CO2_N(ivl),CO2_L(ivl));
+	        cvt_band[icvt].alt_dep=1;
+		icvt++; 
+	       }
+	      }
+
+	 /*
+          * dn=2
+          */
+
+	     if(
+	       ( CO2_N(ivu)  == CO2_N(ivl)-2     ) &&
+	       ( CO2_V3(ivu) == CO2_V3(ivl)+1    )
+	       )
+	     {
+              if(mol_in_the_problem(MOL_N2,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_N2;
+	       cvt_band[icvt].group=CO2_GROUP_0+1; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=
+	        CO2_V3(ivu)*PROBDN(CO2_N(ivl),CO2_L(ivl));
+	       cvt_band[icvt].alt_dep=2;
+		icvt++; 
+	      }
+              if(mol_in_the_problem(MOL_O2,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_O2;
+	       cvt_band[icvt].group=CO2_GROUP_0+1; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=
+	        CO2_V3(ivu)*PROBDN(CO2_N(ivl),CO2_L(ivl));
+	       cvt_band[icvt].alt_dep=2;
+		icvt++; 
+	      }
+#ifdef NEW_FEATURES
+              if(mol_in_the_problem(MOL_CO2,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_CO2;
+	       cvt_band[icvt].group=CO2_GROUP_0+1; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=
+	        CO2_V3(ivu)*PROBDN(CO2_N(ivl),CO2_L(ivl));
+	       cvt_band[icvt].alt_dep=2;
+		icvt++; 
+	      }
+              if(mol_in_the_problem(MOL_O,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_O;
+	       cvt_band[icvt].group=CO2_GROUP_0+1; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=
+	        CO2_V3(ivu)*PROBDN(CO2_N(ivl),CO2_L(ivl));
+	       cvt_band[icvt].alt_dep=2;
+		icvt++; 
+	      }
+#endif
+	     }
+
+	 /*
+          * dn=3
+          */
+
+	     if(
+	       ( CO2_N(ivu)  == CO2_N(ivl)-3     ) &&
+	       ( CO2_V3(ivu) == CO2_V3(ivl)+1    )
+	       )
+	     {
+              if(mol_in_the_problem(MOL_N2,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_N2;
+	       cvt_band[icvt].group=CO2_GROUP_0+1; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=
+	        CO2_V3(ivu)*PROBDN(CO2_N(ivl),CO2_L(ivl));
+	       cvt_band[icvt].alt_dep=3;
+		icvt++; 
+	      }
+              if(mol_in_the_problem(MOL_O2,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_O2;
+	       cvt_band[icvt].group=CO2_GROUP_0+1; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=
+	        CO2_V3(ivu)*PROBDN(CO2_N(ivl),CO2_L(ivl));
+	       cvt_band[icvt].alt_dep=3;
+		icvt++; 
+	      }
+#ifdef NEW_FEATURES
+              if(mol_in_the_problem(MOL_CO2,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_CO2;
+	       cvt_band[icvt].group=CO2_GROUP_0+1; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=
+	        CO2_V3(ivu)*PROBDN(CO2_N(ivl),CO2_L(ivl));
+	       cvt_band[icvt].alt_dep=3;
+		icvt++; 
+	      }
+              if(mol_in_the_problem(MOL_CO,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_CO;
+	       cvt_band[icvt].group=CO2_GROUP_0+1; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=
+	        CO2_V3(ivu)*PROBDN(CO2_N(ivl),CO2_L(ivl));
+	       cvt_band[icvt].alt_dep=3;
+		icvt++; 
+	      }
+              if(mol_in_the_problem(MOL_O,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_O;
+	       cvt_band[icvt].group=CO2_GROUP_0+1; /* process groups enumeration */ 
+	       cvt_band[icvt].alt_indep=
+	        CO2_V3(ivu)*PROBDN(CO2_N(ivl),CO2_L(ivl));
+	       cvt_band[icvt].alt_dep=3;
+		icvt++; 
+	      }
+#endif
+	     }
+
+	    /* reverse processes */
+
+	     if(
+	       ( CO2_N(ivu)  == CO2_N(ivl)+3     ) && 
+	       ( CO2_V3(ivu) == CO2_V3(ivl)-1    )
+	       )
+	     {
+              if(mol_in_the_problem(MOL_N2,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_N2;
+	       cvt_band[icvt].group=CO2_GROUP_0+1; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=
+	        CO2_V3(ivu)*PROBDN(CO2_N(ivl),CO2_L(ivl));
+	       cvt_band[icvt].alt_dep=3;
+		icvt++; 
+	      }
+              if(mol_in_the_problem(MOL_O2,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_O2;
+	       cvt_band[icvt].group=CO2_GROUP_0+1; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=
+	        CO2_V3(ivu)*PROBDN(CO2_N(ivl),CO2_L(ivl));
+	       cvt_band[icvt].alt_dep=3;
+		icvt++; 
+	      }
+#ifdef NEW_FEATURES
+              if(mol_in_the_problem(MOL_CO2,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_CO2;
+	       cvt_band[icvt].group=CO2_GROUP_0+1; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=
+	        CO2_V3(ivu)*PROBDN(CO2_N(ivl),CO2_L(ivl));
+	       cvt_band[icvt].alt_dep=3;
+		icvt++; 
+	      }
+              if(mol_in_the_problem(MOL_CO,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_CO;
+	       cvt_band[icvt].group=CO2_GROUP_0+1; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=
+	        CO2_V3(ivu)*PROBDN(CO2_N(ivl),CO2_L(ivl));
+	       cvt_band[icvt].alt_dep=3;
+		icvt++; 
+	      }
+              if(mol_in_the_problem(MOL_O,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_O;
+	       cvt_band[icvt].group=CO2_GROUP_0+1; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=
+	        CO2_V3(ivu)*PROBDN(CO2_N(ivl),CO2_L(ivl));
+	       cvt_band[icvt].alt_dep=3;
+		icvt++; 
+	      }
+#endif
+	     }
+
+
+          /*
+           * CO2 - VT2:
+           */
+
+	     if(
+	       ( CO2_N(ivu)  == CO2_N(ivl)+1     ) &&
+	       ( abs(CO2_L(ivu)-CO2_L(ivl)) == 1 ) &&
+	       ( CO2_V3(ivu) == CO2_V3(ivl)      )
+	       )
+	     {
+	      testdeb=find_debye(iMol,ivu,ivl,mol,deb,pars)*4/RPR42;
+	      if(
+	        ( CO2_N(ivu)  == 1 ) &&
+	        ( CO2_L(ivu)  == 1 )
+	        )
+	      {
+	       testdeb=1;
+	      }
+	      if(
+	        ( CO2_N(ivu)  == 2 ) &&
+	        ( CO2_L(ivu)  == 0 ) &&
+	        ( CO2_L(ivl)  == 1 )
+	        )
+	      {
+	       testdeb=2;
+	      }
+	      if(
+	        ( CO2_N(ivu)  == 2 ) &&
+	        ( CO2_L(ivu)  == 2 ) &&
+	        ( CO2_L(ivl)  == 1 )
+	        )
+	      {
+	       testdeb=4;
+	      }
+
+              if(mol_in_the_problem(MOL_N2,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_N2;
+	       cvt_band[icvt].group=CO2_GROUP_0+2; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=testdeb;
+	       cvt_band[icvt].alt_dep=0; /* 28.02.03 */
+		icvt++;
+	      }
+              if(mol_in_the_problem(MOL_O2,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_O2;
+	       cvt_band[icvt].group=CO2_GROUP_0+2; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=testdeb;
+	       cvt_band[icvt].alt_dep=0; /* 28.02.03 */
+
+		icvt++; 
+	      }
+#ifdef NEW_FEATURES
+              if(mol_in_the_problem(MOL_CO2,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_CO2;
+	       cvt_band[icvt].group=CO2_GROUP_0+2; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=testdeb;
+	       cvt_band[icvt].alt_dep=0; /* 28.02.03 */
+/*
+printf("icvt= %3i alt_indep= %6.4e\n",icvt,testdeb);	       
+*/
+		icvt++;
+	      }
+              if(mol_in_the_problem(MOL_CO,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_CO;
+	       cvt_band[icvt].group=CO2_GROUP_0+2; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=testdeb;
+	       cvt_band[icvt].alt_dep=0; /* 28.02.03 */
+
+		icvt++; 
+	      }
+#endif
+              if(mol_in_the_problem(MOL_O,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_O;
+	       cvt_band[icvt].group=CO2_GROUP_0+2; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=
+	        find_debye(iMol,ivu,ivl,mol,deb,pars)/RPR21;
+	       cvt_band[icvt].alt_dep=0; /* 28.02.03 */
+
+	       if(
+	         ( CO2_N(ivu)  == 1 ) &&
+	         ( CO2_L(ivu)  == 1 )
+	         )
+	       {
+	        cvt_band[icvt].alt_indep=1;
+	       }
+		icvt++;
+	      }
+	     }
+
+          /*
+           * CO2 - VT3:
+           */
+
+	     if(
+	       ( CO2_N(ivu)  == CO2_N(ivl)       ) &&
+	       ( CO2_V3(ivu) == CO2_V3(ivl)+1    )
+	       )
+	     {
+              if(mol_in_the_problem(MOL_O,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_O;
+	       cvt_band[icvt].group=CO2_GROUP_0+3; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=
+	        CO2_V3(ivu)*PROBDN(CO2_N(ivl),CO2_L(ivl));
+	       cvt_band[icvt].alt_dep=0; /* 28.02.03 */
+
+		icvt++;
+              }
+             }
+
+          /*
+           * VT4:
+           */
+
+	     if(
+	       ( CO2_N(ivu)  == CO2_N(ivl)       ) &&
+	       ( CO2_V3(ivu) == CO2_V3(ivl)      )
+	       )
+	     {
+              if(mol_in_the_problem(MOL_N2,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_N2;
+	       cvt_band[icvt].group=CO2_GROUP_0+4; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=STWT;
+	       cvt_band[icvt].alt_dep=0; /* 28.02.03 */
+
+		icvt++;
+	      }
+              if(mol_in_the_problem(MOL_O2,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_O2;
+	       cvt_band[icvt].group=CO2_GROUP_0+4; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=STWT;
+	       cvt_band[icvt].alt_dep=0; /* 28.02.03 */
+
+		icvt++;
+	      }
+              if(mol_in_the_problem(MOL_O,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_O;
+	       cvt_band[icvt].group=CO2_GROUP_0+4; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=STWT;
+	       cvt_band[icvt].alt_dep=0; /* 28.02.03 */	       
+
+		icvt++;
+	      }
+#ifdef NEW_FEATURES
+              if(mol_in_the_problem(MOL_CO2,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_CO2;
+	       cvt_band[icvt].group=CO2_GROUP_0+4; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=STWT;
+	       cvt_band[icvt].alt_dep=0; /* 28.02.03 */
+		icvt++;
+	      }
+              if(mol_in_the_problem(MOL_CO,mol,pars))
+              {
+               SORT_ON_E;
+	       cvt_band[icvt].partner=MOL_CO;
+	       cvt_band[icvt].group=CO2_GROUP_0+4; /* process groups enumeration */
+	       cvt_band[icvt].alt_indep=STWT;
+	       cvt_band[icvt].alt_dep=0; /* 28.02.03 */
+		icvt++;
+	      }
+#endif
+	     }
+           }

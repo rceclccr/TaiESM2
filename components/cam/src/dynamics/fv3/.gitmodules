@@ -1,0 +1,6 @@
+[submodule "atmos_cubed_sphere"]
+	path = atmos_cubed_sphere
+	url = https://github.com/NOAA-GFDL/GFDL_atmos_cubed_sphere.git
+	fxtag = FV3-202204-public
+	fxrequired = AlwaysRequired
+        fxDONOTUSEurl = https://github.com/NOAA-GFDL/GFDL_atmos_cubed_sphere.git

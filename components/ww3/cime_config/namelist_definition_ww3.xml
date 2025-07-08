@@ -1,0 +1,397 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet type="text/xsl" href="http://www.cgd.ucar.edu/~cam/namelist/namelist_definition_CICE.xsl"?>
+
+<entry_id version="2.0">
+
+  <!-- Each namelist variable is defined in an <entry> element.  The
+     content of the element is the documentation of how the variable is
+     used.  Other elements  are:
+     id
+          The variable's name.  *** N.B. *** The name must be lower case.
+          The #module convert all namelist variable names to lower case
+          since Fortran is case insensitive.
+     type
+          An abbreviation of the fortran declaration for the variable.
+	  Valid declarations are:
+             char, integer, logical, real
+	  Any of these types may be followed by a comma separated list of
+	  integers enclosed in parenthesis to indicate an array.
+	  The current namelist validation code only distinquishes between
+	  string and non-string types.
+     category
+          A category assigned for organizing the documentation.
+     group
+          The namelist group that the variable is declared in.
+     valid_values
+          This is an optional attribute that is mainly useful for variables
+          that have only a small number of allowed values.
+  -->
+
+  <entry id="initfile" skip_default_entry="true">
+    <type>char</type>
+    <group>ww3_inparm</group>
+    <category>setup</category>
+    <values>
+      <value runtype="startup">"" </value>
+      <value runtype="hybrid" >"" </value>
+      <value runtype="startup"	wav_grid="ww3a">$DIN_LOC_ROOT/wav/ww3/ww3a.restart.ww3.calm.wwver7.14.220119</value>
+      <value runtype="hybrid"	wav_grid="ww3a">$DIN_LOC_ROOT/wav/ww3/ww3a.restart.ww3.calm.wwver7.14.220119</value>
+      <value runtype="startup"	wav_grid="wgx3v7">$DIN_LOC_ROOT/wav/ww3/wgx3v7.restart.ww3.calm.240722</value>
+      <value runtype="hybrid"	wav_grid="wgx3v7">$DIN_LOC_ROOT/wav/ww3/wgx3v7.restart.ww3.calm.240722</value>
+      <value runtype="startup"	wav_grid="wtx2_3v2">$DIN_LOC_ROOT/wav/ww3/wt232.restart.ww3.calm.240722</value>
+      <value runtype="hybrid"	wav_grid="wtx2_3v2">$DIN_LOC_ROOT/wav/ww3/wt232.restart.ww3.calm.240722</value>
+      <value runtype="startup"	wav_grid="wtnx1v4nw">' '</value>
+      <value runtype="hybrid"	wav_grid="wtnx1v4nw">' '</value>
+      <value runtype="startup"	wav_grid="wtnx1v4">$DIN_LOC_ROOT/wav/ww3/wtnx1v4.restart.ww3.230308</value>
+      <value runtype="hybrid"	wav_grid="wtnx1v4">$DIN_LOC_ROOT/wav/ww3/wtnx1v4.restart.ww3.230308</value>
+    </values>
+    <desc>
+      Initial condition file.
+      This is set in ww buildnml from refacase and refdate for branch runs
+    </desc>
+  </entry>
+
+  <entry id="prestage_wind">
+    <type>char</type>
+    <group>prestage_only</group>
+    <category>prestage_only</category>
+    <input_pathname>abs</input_pathname>
+    <values>
+      <value>$DIN_LOC_ROOT/wav/ww3/core2_G4_wns_30min_20000601_to_05.nc</value>
+    </values>
+    <desc>
+      This namelist group is only here to ensure that this file is in $DIN_LOC_ROOT and
+      can be obtained by check_input_data if need be
+    </desc>
+  </entry>
+
+  <entry id="prestage_mod_def">
+    <type>char</type>
+    <group>prestage_only</group>
+    <category>prestage_only</category>
+    <input_pathname>abs</input_pathname>
+    <values>
+      <value>$DIN_LOC_ROOT/wav/ww3/G4L1.mod_def.ww3.121031</value>
+    </values>
+    <desc>
+      This namelist group is only here to ensure that this file is in $DIN_LOC_ROOT and
+      can be obtained by check_input_data if need be
+    </desc>
+  </entry>
+
+  <entry id="dtmax">
+    <type>real</type>
+    <group>ww3_inparm</group>
+    <category>setup</category>
+    <values>
+      <value>1800.</value>
+      <value wav_grid="ww3a">3600.</value>
+      <value wav_grid="wgx3v7">1800.</value>
+      <value wav_grid="wtx2_3v2">1200.</value>
+      <value wav_grid="wtnx1v4">1800.</value>
+      <value wav_grid="w025">1200.</value>
+    </values>
+    <desc>
+      Maximum overall time step
+    </desc>
+  </entry>
+  <entry id="dtcfl">
+    <type>real</type>
+    <group>ww3_inparm</group>
+    <category>setup</category>
+    <values>
+      <value>900.</value>
+      <value wav_grid="ww3a">1800.</value>
+      <value wav_grid="wgx3v7">450.</value>
+      <value wav_grid="wtx2_3v2">450.</value>
+      <value wav_grid="wtnx1v4">900.</value>
+      <value wav_grid="w025">600.</value>
+    </values>
+    <desc>
+      Maximum CFL time step X-Y propagation.
+    </desc>
+  </entry>
+  <entry id="dtcfli">
+    <type>real</type>
+    <group>ww3_inparm</group>
+    <category>setup</category>
+    <values>
+      <value>900.</value>
+      <value wav_grid="ww3a">1800.</value>
+      <value wav_grid="wgx3v7">900</value>
+      <value wav_grid="wtx2_3v2">900</value>
+      <value wav_grid="wtnx1v4">900.</value>
+      <value wav_grid="w025">600.</value>
+    </values>
+    <desc>
+      Id. intra-spectral
+    </desc>
+  </entry>
+  <entry id="dtmin">
+    <type>real</type>
+    <group>ww3_inparm</group>
+    <category>setup</category>
+    <values>
+      <value>10</value>
+    </values>
+    <desc>
+      Minimum dynamic time step for source
+    </desc>
+  </entry>
+
+  <entry id='domain_percent_start'>
+    <type>char</type>
+    <group>domain_nml</group>
+    <category>setup</category>
+    <values>
+      <value>unset</value>
+    </values>
+  </entry>
+  <entry id="domain_percent_stop">
+    <type>char</type>
+    <group>domain_nml</group>
+    <category>setup</category>
+    <values>
+      <value>'99990101 0'</value>
+    </values>
+  </entry>
+
+  <entry id="input_percent_forcing_percent_water_levels">
+    <type>char</type>
+    <group>input_nml</group>
+    <category>setup</category>
+    <values>
+      <value>T</value>
+    </values>
+  </entry>
+  <entry id="input_percent_forcing_percent_currents">
+    <type>char</type>
+    <group>input_nml</group>
+    <category>setup</category>
+    <values>
+      <value>T</value>
+    </values>
+  </entry>
+  <entry id="input_percent_forcing_percent_winds">
+    <type>char</type>
+    <group>input_nml</group>
+    <category>setup</category>
+    <values>
+      <value>T</value>
+    </values>
+  </entry>
+  <entry id="input_percent_forcing_percent_ice_conc">
+    <type>char</type>
+    <group>input_nml</group>
+    <category>setup</category>
+    <values>
+      <value>T</value>
+    </values>
+  </entry>
+  <entry id="input_percent_forcing_percent_ice_param1">
+    <type>char</type>
+    <group>input_nml</group>
+    <category>setup</category>
+    <values>
+      <value>T</value>
+    </values>
+  </entry>
+  <entry id="input_percent_forcing_percent_ice_param2">
+    <type>char</type>
+    <group>input_nml</group>
+    <category>setup</category>
+    <values>
+      <value>F</value>
+    </values>
+  </entry>
+  <entry id="input_percent_forcing_percent_ice_param3">
+    <type>char</type>
+    <group>input_nml</group>
+    <category>setup</category>
+    <values>
+      <value>F</value>
+    </values>
+  </entry>
+  <entry id="input_percent_forcing_percent_ice_param4">
+    <type>char</type>
+    <group>input_nml</group>
+    <category>setup</category>
+    <values>
+      <value>F</value>
+    </values>
+  </entry>
+  <entry id="input_percent_forcing_percent_ice_param5">
+    <type>char</type>
+    <group>input_nml</group>
+    <category>setup</category>
+    <values>
+      <value>T</value>
+    </values>
+  </entry>
+  <entry id="input_percent_forcing_percent_atm_momentum">
+    <type>char</type>
+    <group>input_nml</group>
+    <category>setup</category>
+    <values>
+      <value>F</value>
+    </values>
+  </entry>
+  <entry id="input_percent_forcing_percent_air_density">
+    <type>char</type>
+    <group>input_nml</group>
+    <category>setup</category>
+    <values>
+      <value>F</value>
+    </values>
+  </entry>
+  <entry id="input_percent_forcing_percent_mud_density">
+    <type>char</type>
+    <group>input_nml</group>
+    <category>setup</category>
+    <values>
+      <value>F</value>
+    </values>
+  </entry>
+  <entry id="input_percent_forcing_percent_mud_thickness">
+    <type>char</type>
+    <group>input_nml</group>
+    <category>setup</category>
+    <values>
+      <value>F</value>
+    </values>
+  </entry>
+  <entry id="input_percent_forcing_percent_mud_viscosity">
+    <type>char</type>
+    <group>input_nml</group>
+    <category>setup</category>
+    <values>
+      <value>F</value>
+    </values>
+  </entry>
+  <entry id="input_percent_assim_percent_mean">
+    <type>char</type>
+    <group>input_nml</group>
+    <category>setup</category>
+    <values>
+      <value>F</value>
+    </values>
+  </entry>
+  <entry id="input_percent_assim_percent_spec1d">
+    <type>char</type>
+    <group>input_nml</group>
+    <category>setup</category>
+    <values>
+      <value>F</value>
+    </values>
+  </entry>
+  <entry id="input_percent_assim_percent_spec2d">
+    <type>char</type>
+    <group>input_nml</group>
+    <category>setup</category>
+    <values>
+      <value>F</value>
+    </values>
+  </entry>
+
+  <entry id="type_percent_field_percent_list">
+    <type>char</type>
+    <group>output_type_nml</group>
+    <category>setup</category>
+    <values>
+      <value>WND ICE HS T02 T0M1 T01 FP DIR EF USS TOC</value>
+    </values>
+  </entry>
+  <entry id="type_percent_point_percent_file">
+    <type>char</type>
+    <group>output_type_nml</group>
+    <category>setup</category>
+    <values>
+      <value>points.list</value>
+    </values>
+  </entry>
+
+  <entry id="date_percent_field_percent_outffile">
+    <type>char</type>
+    <group>output_date_nml</group>
+    <category>setup</category>
+    <values>
+      <value>1</value>
+    </values>
+  </entry>
+  <entry id="date_percent_field_percent_start">
+    <type>char</type>
+    <group>output_date_nml</group>
+    <category>setup</category>
+    <values>
+      <value>unset</value>
+    </values>
+  </entry>
+  <entry id="date_percent_field_percent_stride">
+    <type>char</type>
+    <group>output_date_nml</group>
+    <category>setup</category>
+    <values>
+      <value>unset</value>
+    </values>
+  </entry>
+  <entry id="date_percent_field_percent_stop">
+    <type>char</type>
+    <group>output_date_nml</group>
+    <category>setup</category>
+    <values>
+      <value>99990101 0</value>
+    </values>
+  </entry>
+
+  <entry id="date_percent_restart_percent_start">
+    <type>char</type>
+    <group>output_date_nml</group>
+    <category>setup</category>
+    <values>
+      <value>unset</value>
+    </values>
+  </entry>
+  <entry id="date_percent_restart_percent_stride">
+    <type>char</type>
+    <group>output_date_nml</group>
+    <category>setup</category>
+    <values>
+      <value>unset</value>
+    </values>
+  </entry>
+  <entry id="date_percent_restart_percent_stop">
+    <type>char</type>
+    <group>output_date_nml</group>
+    <category>setup</category>
+    <values>
+      <value>99990101 0</value>
+    </values>
+  </entry>
+
+  <entry id="date_percent_restart2_percent_start">
+    <type>char</type>
+    <group>output_date_nml</group>
+    <category>setup</category>
+    <values>
+      <value>99990101 0</value>
+    </values>
+  </entry>
+  <entry id="date_percent_restart2_percent_stride">
+    <type>char</type>
+    <group>output_date_nml</group>
+    <category>setup</category>
+    <values>
+      <value>0</value>
+    </values>
+  </entry>
+  <entry id="date_percent_restart2_percent_stop">
+    <type>char</type>
+    <group>output_date_nml</group>
+    <category>setup</category>
+    <values>
+      <value>99990101 0</value>
+    </values>
+  </entry>
+
+</entry_id>

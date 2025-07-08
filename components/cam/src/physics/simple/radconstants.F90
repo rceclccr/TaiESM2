@@ -1,0 +1,65 @@
+module radconstants
+
+! provide stubs to allow building with no radiation scheme active
+
+use shr_kind_mod,   only: r8 => shr_kind_r8
+use cam_abortutils, only: endrun
+
+implicit none
+private
+save
+
+integer, parameter, public :: nswbands = 1
+integer, parameter, public :: nlwbands = 1
+integer, parameter, public :: idx_sw_diag = 1
+integer, parameter, public :: idx_lw_diag = 1
+integer, parameter, public :: idx_nir_diag = 1
+integer, parameter, public :: idx_uv_diag = 1
+
+public :: rad_gas_index
+public :: get_lw_spectral_boundaries, get_sw_spectral_boundaries
+
+integer, public, parameter :: gasnamelength = 1
+integer, public, parameter :: nradgas = 1
+character(len=gasnamelength), public, parameter :: gaslist(nradgas) &
+   = (/' '/)
+
+!========================================================================================
+contains
+!========================================================================================
+
+integer function rad_gas_index(gasname)
+
+   character(len=*),intent(in) :: gasname
+
+   call endrun('rad_gas_index: ERROR: this is a stub')
+
+end function rad_gas_index
+
+!------------------------------------------------------------------------------
+
+subroutine get_lw_spectral_boundaries(low_boundaries, high_boundaries, units)
+   ! stub should not be called
+
+   real(r8), intent(out) :: low_boundaries(nlwbands), high_boundaries(nlwbands)
+   character(*), intent(in) :: units ! requested units
+
+   call endrun('get_lw_spectral_boundaries: ERROR: this is a stub')
+
+end subroutine get_lw_spectral_boundaries
+
+!------------------------------------------------------------------------------
+
+subroutine get_sw_spectral_boundaries(low_boundaries, high_boundaries, units)
+   ! stub should not be called
+
+   real(r8), intent(out) :: low_boundaries(nswbands), high_boundaries(nswbands)
+   character(*), intent(in) :: units ! requested units
+
+   call endrun('get_sw_spectral_boundaries: ERROR: this is a stub')
+
+end subroutine get_sw_spectral_boundaries
+
+!------------------------------------------------------------------------------
+
+end module radconstants

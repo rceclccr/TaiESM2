@@ -1,0 +1,7 @@
+[submodule "WW3"]
+path = WW3
+url = https://github.com/ESCOMP/WW3.git
+fxtag = dev/unified_0.0.13
+fxrequired = AlwaysRequired
+fxDONOTUSEurl = https://github.com/ESCOMP/WW3.git
+

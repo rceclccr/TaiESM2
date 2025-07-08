@@ -1,0 +1,388 @@
+#!/usr/bin/env python3
+
+"""CICE namelist creator
+"""
+
+# Typically ignore this.
+# pylint: disable=invalid-name
+
+# Disable these because this is our standard setup
+# pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position
+
+import os, shutil, sys, glob, filecmp, re
+
+CIMEROOT = os.environ.get("CIMEROOT")
+if CIMEROOT is None:
+    raise SystemExit("ERROR: must set CIMEROOT environment variable")
+sys.path.append(os.path.join(CIMEROOT, "CIME", "Tools"))
+
+from standard_script_setup import *
+from CIME.case import Case
+from CIME.nmlgen import NamelistGenerator
+from CIME.utils import expect
+from CIME.utils import run_cmd_no_fail, expect
+from CIME.utils import run_cmd
+from CIME.buildnml import create_namelist_infile, parse_input
+
+import glob, shutil
+logger = logging.getLogger(__name__)
+
+# pylint: disable=too-many-arguments,too-many-locals,too-many-branches,too-many-statements
+####################################################################################
+def _create_namelists(case, confdir, infile, nmlgen, inst_string):
+####################################################################################
+
+    """Write out the namelist for this component.
+
+    Most arguments are the same as those for `NamelistGenerator`.
+    The `confdir` argument is used to specify the directory  in which output files will be placed.
+    """
+    #----------------------------------------------------
+    # Clear out old data.
+    #----------------------------------------------------
+    data_list_path = os.path.join(case.get_case_root(), "Buildconf", "cice.input_data_list")
+    if os.path.exists(data_list_path):
+        os.remove(data_list_path)
+
+    #----------------------------------------------------
+    # Create config dictionary
+    #----------------------------------------------------
+    config = {}
+
+    config['ocn_comp'] = case.get_value("COMP_OCN")
+
+    cice_mode = case.get_value("CICE_MODE")
+    hgrid = case.get_value('ICE_GRID')
+    config['hgrid'] = hgrid
+    config['cice_mode'] = cice_mode
+
+    cice_config_opts = case.get_value('CICE_CONFIG_OPTS')
+    if "cice5" in cice_config_opts:
+        phys = "cice5"
+    elif "cice4" in cice_config_opts:
+        phys = "cice4"
+    config['phys'] = phys
+
+    cam_config_opts = case.get_value('CAM_CONFIG_OPTS')
+    if cam_config_opts is not None:
+        if "cam4" in cam_config_opts:
+            config['cam4'] = ".true."
+        elif "cam5" in cam_config_opts:
+            config['cam5'] = ".true."
+
+    if cice_mode == 'prescribed':
+        config['sstice_stream'] = case.get_value("SSTICE_STREAM")
+
+    #----------------------------------------------------
+    # Number of ice categories
+    #----------------------------------------------------
+
+    # NOTE that ICE_NCAT is used by both cice and pop - but is set by cice!
+    # It is set in the driver config_component.xml and apears in the env_build.xml file 
+    # It is assumed that the cice buildnml is called BEFORE the pop buildcpp. 
+    # This order is set by the xml variable COMP_CLASSES in the driver config_component.xml file
+
+    cice_mode = case.get_value("CICE_MODE")
+    if cice_mode == 'prescribed':
+        ncat = 1
+    else:
+        ncat = 5
+    case.set_value("ICE_NCAT", ncat)
+    logger.debug("cice: number of ice categories (ncat) is %s" %ncat)
+
+    #----------------------------------------------------
+    # Set grid
+    #----------------------------------------------------
+
+    nx = case.get_value("ICE_NX")
+    ny = case.get_value("ICE_NY")
+    ice_grid = case.get_value('ICE_GRID')
+    if ice_grid == 'ar9v2':
+        hgrid = 'ar9v1'
+    elif ice_grid == 'ar9v4':
+        hgrid = 'ar9v3'
+    else:
+        hgrid = ice_grid
+
+    #----------------------------------------------------
+    # Set decomposition
+    #----------------------------------------------------
+
+    driver = case.get_value("COMP_INTERFACE")
+    if driver == 'mct':
+        single_column = case.get_value("PTS_MODE")
+    elif driver == 'nuopc':
+        scol_lon = float(case.get_value('PTS_LON'))
+        scol_lat = float(case.get_value('PTS_LAT'))
+        if scol_lon > -999. and scol_lat > -999.:
+            single_column = True
+        else:
+            single_column = False
+
+    if single_column:
+        # explicitly set values for single column mode
+        cice_blckx = 1
+        cice_blcky = 1
+        cice_mxblcks = 1
+        cice_decomptype = "cartesian"
+        cice_decompsetting = "square-ice"
+    else:
+        nthrds_ice = case.get_value("NTHRDS_ICE")
+        ninst_ice = case.get_value("NINST_ICE")
+        ntasks = case.get_value("NTASKS_PER_INST_ICE")
+        comp_root_dir_ice = case.get_value("COMP_ROOT_DIR_ICE")
+        srcroot = case.get_value("SRCROOT")
+
+        cmd = os.path.join(comp_root_dir_ice, "bld", "generate_cice_decomp.pl")
+        command = "%s -ccsmroot %s -res %s -nx %s -ny %s -nproc %s -thrds %s -output %s "  \
+                  % (cmd, srcroot, hgrid, nx, ny, ntasks, nthrds_ice, "all")
+        rc, out, err = run_cmd(command, verbose=True)
+
+        expect(rc==0,"Command %s failed rc=%d\nout=%s\nerr=%s"%(cmd,rc,out,err))
+        if out is not None:
+            logger.debug("     %s"%out)
+        if err is not None:
+            logger.debug("     %s"%err)
+
+        decompconfig = out.split()
+        if int(decompconfig[0]) > 0:
+             cice_blckx = decompconfig[2]
+             cice_blcky = decompconfig[3]
+             cice_mxblcks = decompconfig[4]
+             if cice_mode == 'prescribed':
+                 cice_decomptype = "roundrobin"
+             else:
+                 cice_decomptype = decompconfig[5]
+             cice_decompsetting = decompconfig[6]
+
+    #----------------------------------------------------
+    # Initialize namelist defaults
+    #----------------------------------------------------
+    nmlgen.init_defaults(infile, config)
+
+    # overwrite nx_global and ny_global if single_column
+    if single_column:
+        nmlgen.set_value("nx_global", 1)
+        nmlgen.set_value("ny_global", 1)
+
+    # For each of the following we need to assure that the user didn't set in
+    # user_nl
+    with open(infile[0], "r") as fh:
+        user_nls = _strip_comments(fh)
+        user_nl = "\n".join(usr_nl for usr_nl in user_nls)
+
+    if not "block_size_x" in user_nl:
+        nmlgen.set_value('block_size_x', value=cice_blckx)
+    if not "block_size_y" in user_nl:
+        nmlgen.set_value('block_size_y', value=cice_blcky)
+    if not "max_blocks" in user_nl:
+        nmlgen.set_value('max_blocks', value=cice_mxblcks)
+    if not "distribution_type" in user_nl:
+        nmlgen.set_value('distribution_type', value=cice_decomptype)
+    if not "processor_shape" in user_nl:
+        nmlgen.set_value('processor_shape', value=cice_decompsetting)
+
+    #----------------------------------------------------
+    # Set other values not obtained in the default settings
+    #----------------------------------------------------
+
+    if nmlgen.get_value('n_aero') == '0':
+        nmlgen.set_value('tr_aero', value=".false.")
+    # if nmlgen.get_value('n_iso') > '0':
+    #     nmlgen.set_value('tr_iso', value=".true.")
+
+    if nmlgen.get_value('gridcpl_file') == 'UNSET':
+        nmlgen.set_value('gridcpl_file', value="unknown_gridcpl_file")
+    if nmlgen.get_value('bathymetry_file') == 'UNSET':
+        nmlgen.set_value('bathymetry_file', value="unknown_bathymetry_file")
+
+    # TODO: tcraig, why is this here and what is it doing?
+    if cice_decompsetting == 'null':
+        config['cice_decomp_setting'] = 'null'
+        processor_shape = nmlgen.get_default('processor_shape', config=config)
+    else:
+        processor_shape = cice_decompsetting
+    nmlgen.set_value('processor_shape', value=processor_shape)
+
+    # set initial conditions for branch of hybrid runs
+    # TODO - need to implement multi-instance for these files - the following assumes single instance
+    run_type = case.get_value("RUN_TYPE")
+    ice_ic = None
+    if run_type == 'branch' or run_type == 'hybrid':
+        run_refcase = case.get_value("RUN_REFCASE")
+        run_refdate = case.get_value("RUN_REFDATE")
+        run_tod     = case.get_value("RUN_REFTOD")
+        ice_ic = "%s.cice%s.r.%s-%s.nc" %(run_refcase, inst_string, run_refdate, run_tod)
+        nmlgen.add_default("ice_ic", value=ice_ic, ignore_abs_path=True)
+    else:
+        nmlgen.add_default("ice_ic")
+        if nmlgen.get_value('ice_ic') == 'UNSET':
+            nmlgen.set_value('ice_ic', value="default")
+
+    # error checks for prescribed ice mode
+    if cice_mode == 'prescribed':
+        sstice_grid_filename = case.get_value('SSTICE_GRID_FILENAME')
+        sstice_data_filename = case.get_value('SSTICE_DATA_FILENAME')
+        sstice_year_align = case.get_value('SSTICE_YEAR_ALIGN')
+        sstice_year_start = case.get_value('SSTICE_YEAR_START')
+        sstice_year_end = case.get_value('SSTICE_YEAR_END')
+        if sstice_grid_filename == 'UNSET':
+            expect(False,  "%s must be set for cice prescribed mode" %sstice_grid_filename)
+        if sstice_data_filename == 'UNSET':
+            expect(False,  "%s must be set for cice prescribed mode" %sstice_data_filename)
+        if sstice_year_align == 'UNSET':
+            expect(False,  "%s must be set for cice prescribed mode" %sstice_year_align)
+        if sstice_year_start== 'UNSET':
+            expect(False,  "%s must be set for cice prescribed mode" %sstice_year_start)
+        if sstice_year_end== 'UNSET':
+            expect(False,  "%s must be set for cice prescribed mode" %sstice_year_end)
+
+    # Set timestamp pointer file
+    rundir = case.get_value("RUNDIR")
+    drv_ptr = case.get_value("DRV_RESTART_POINTER")
+    if drv_ptr:
+        cice_ptr = drv_ptr.replace("cpl","ice")
+        cice_ptr = cice_ptr.replace("_0001", inst_string)
+    else:
+        # find the most recent file matching pattern
+        cice_ptr = None
+        pattern = "rpointer.ice*"
+        os.chdir(rundir)
+        files = glob.glob(pattern)
+        files.sort(key=lambda x: os.path.getmtime(os.path.join(rundir,x)))
+        os.chdir(case.get_case_root())
+        if files:
+            cice_ptr = files[-1]
+
+    if cice_ptr and os.path.exists(os.path.join(rundir, cice_ptr)):
+        nmlgen.set_value('pointer_file', cice_ptr)
+
+    #----------------------------------------------------
+    # Write out namelist groups
+    #----------------------------------------------------
+    groups=['setup_nml',
+            'grid_nml',
+            'tracer_nml',
+            'thermo_nml',
+            'dynamics_nml',
+            'shortwave_nml',
+            'ponds_nml',
+            'snow_nml',
+            'forcing_nml',
+            'domain_nml',
+            'ice_prescribed_nml',
+            'zbgc_nml',
+            'icefields_bgc_nml',
+            'icefields_drag_nml',
+            'icefields_fsd_nml',
+            'icefields_mechred_nml',
+            'icefields_pond_nml',
+            'icefields_snow_nml',
+            'icefields_nml']
+
+    namelist_file = os.path.join(confdir, "ice_in")
+    nmlgen.write_output_file(namelist_file, data_list_path, groups=groups, sorted_groups=False)
+    if ice_ic:
+        with open(data_list_path, "a") as fd:
+            fd.write(f"ice_ic = {ice_ic}")
+    
+    logger.debug("cice: grid is %s" %(hgrid))
+    logger.debug("cice: physics is %s "%phys)
+
+###############################################################################
+def buildnml(case, caseroot, compname):
+###############################################################################
+    """Build the cice namelist """
+
+    # Build the component namelist
+    if compname != "cice":
+        raise AttributeError
+    comp_root_dir_ice = case.get_value("COMP_ROOT_DIR_ICE")
+    srcroot = case.get_value("SRCROOT")
+    rundir = case.get_value("RUNDIR")
+    ninst = case.get_value("NINST_ICE")
+
+    # determine the confdir directory
+    confdir = os.path.join(caseroot,"Buildconf","ciceconf")
+    if not os.path.isdir(confdir):
+        os.makedirs(confdir)
+
+    #----------------------------------------------------
+    # Construct the namelist generator
+    #----------------------------------------------------
+    # determine directory for user modified namelist_definitions.xml and namelist_defaults.xml
+    user_xml_dir = os.path.join(caseroot, "SourceMods", "src.cice")
+    expect (os.path.isdir(user_xml_dir),
+            "user_xml_dir %s does not exist " %user_xml_dir)
+
+    # user definition *replaces* existing definition.
+    namelist_xml_dir = os.path.join(comp_root_dir_ice, "cime_config")
+    definition_file = [os.path.join(namelist_xml_dir, "namelist_definition_cice.xml")]
+    user_definition = os.path.join(user_xml_dir, "namelist_definition_cice.xml")
+    if os.path.isfile(user_definition):
+        definition_file = [user_definition]
+    for file_ in definition_file:
+        expect(os.path.isfile(file_), "Namelist XML file %s not found!" % file_)
+
+    # Create the namelist generator object - independent of instance
+    nmlgen = NamelistGenerator(case, definition_file)
+
+    #----------------------------------------------------
+    # Loop over instances
+    #----------------------------------------------------
+    for inst_counter in range(1, ninst+1):
+
+        # determine instance string
+        inst_string = ""
+        if ninst > 1:
+            inst_string = '_' + '%04d' % inst_counter
+
+        # If multi-instance case does not have restart file, use
+        # single-case restart for each instance
+        rpointer = "rpointer.ice"
+        if (os.path.isfile(os.path.join(rundir,rpointer)) and
+            (not os.path.isfile(os.path.join(rundir,rpointer + inst_string)))):
+            shutil.copy(os.path.join(rundir, rpointer),
+                        os.path.join(rundir, rpointer + inst_string))
+
+        inst_string_label = inst_string
+        if not inst_string_label:
+            inst_string_label = "\"\""
+
+        # create namelist_infile using user_nl_file as input
+        user_nl_file = os.path.join(caseroot, "user_nl_cice" + inst_string)
+        expect(os.path.isfile(user_nl_file),
+               "Missing required user_nl_file %s " %(user_nl_file))
+        infile = os.path.join(confdir, "namelist_infile")
+        create_namelist_infile(case, user_nl_file, infile)
+        namelist_infile = [infile]
+
+        # create namelist
+        _create_namelists(case, confdir, namelist_infile, nmlgen, inst_string)
+
+        # copy namelist files to rundir
+        if os.path.isdir(rundir):
+            file1  = os.path.join(confdir, "ice_in")
+            file2 = os.path.join(rundir, "ice_in")
+            if inst_string:
+                file2 += inst_string
+            logger.debug("CICE namelist copy: file1 %s file2 %s " %(file1, file2))
+            shutil.copy2(file1, file2)
+
+def _strip_comments(fh, token="!"):
+    ''' strip anything after token in each line of fh '''
+    for line in fh:
+        s = line.split(token, 1)[0].strip()
+        if s:
+            yield s
+
+
+###############################################################################
+def _main_func():
+
+    caseroot = parse_input(sys.argv)
+    with Case(caseroot, read_only=False) as case:
+        buildnml(case, caseroot, "cice")
+
+if __name__ == "__main__":
+    _main_func()

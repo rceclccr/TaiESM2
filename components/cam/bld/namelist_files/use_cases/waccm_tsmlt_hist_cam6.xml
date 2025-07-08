@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+
+<namelist_defaults>
+
+<start_ymd>19900101</start_ymd>
+
+<!-- Solar data from NRL -->
+<solar_irrad_data_file>atm/cam/solar/SolarForcingCMIP6_18491230-23000102_c20200615.nc</solar_irrad_data_file>
+
+<!-- Kp and F10.7 -->
+<solar_parms_data_file>atm/cam/solar/SolarForcingCMIP6_18491230-23000102_c20200615.nc</solar_parms_data_file>
+
+<!-- Energetic Particle Precipitation -->
+<epp_all_filepath>atm/cam/solar/SolarForcingCMIP6_18491230-23000102_c20200615.nc</epp_all_filepath>
+<epp_all_varname>'epp_ion_rates'</epp_all_varname>
+
+<!--Species IC -->
+<ncdata dyn="fv"  hgrid="0.9x1.25">cesm2_init/b.e21.BWHIST.f09_g17.CMIP6-historical-WACCM.001/1950-01-01/b.e21.BWHIST.f09_g17.CMIP6-historical-WACCM.001.cam.i.1950-01-01-00000.nc</ncdata>
+<ncdata dyn="fv"  hgrid="1.9x2.5" >atm/waccm/ic/f.e15.FWmaAMIP.f19_f19.misc08_cam5_4_81.003.cam.i.1980-01-01-00000_c160928.nc</ncdata>
+<ncdata dyn="fv"  hgrid="4x5"     >atm/waccm/ic/f2000.waccm-mam3_4x5_L70.cam2.i.0017-01-01.c121113.nc</ncdata>
+
+
+<!-- LBC, UBC Files -->
+<flbc_type>SERIAL</flbc_type>
+<flbc_file>atm/waccm/lb/LBC_17500116-20150116_CMIP6_0p5degLat_c180905.nc</flbc_file>
+<flbc_list>
+ 'CCL4', 'CF2CLBR', 'CF3BR', 'CFC11', 'CFC113', 'CFC12', 'CH3BR', 'CH3CCL3', 'CH3CL', 'CH4', 'CO2', 'H2',
+ 'HCFC22', 'N2O', 'CFC114', 'CFC115', 'HCFC141B', 'HCFC142B', 'CH2BR2', 'CHBR3', 'H2402', 'OCS', 'SF6', 'CFC11eq'
+</flbc_list>
+
+<!-- Upper Boundary -->
+<tgcm_ubc_file>atm/waccm/ub/tgcm_ubc_1850-2100_c100204.nc</tgcm_ubc_file>
+<tgcm_ubc_data_type>'INTERP_MISSING_MONTHS'</tgcm_ubc_data_type>
+
+<!-- emissions -->
+
+<ext_frc_type>INTERP_MISSING_MONTHS</ext_frc_type>
+
+<srf_emis_type>INTERP_MISSING_MONTHS</srf_emis_type>
+
+<!-- History Files -->
+
+<mfilt>           1,    5,  20,  40, 120, 240, 365,  73, 365   </mfilt>
+<nhtfrq>          0,  -24,  -6,  -3,  -1,   1, -24,-120,-240  </nhtfrq>
+<avgflag_pertape>'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'I'  </avgflag_pertape>
+
+<history_amwg>.true.</history_amwg>
+<history_aerosol>.false.</history_aerosol>
+<history_carma>.false.</history_carma>
+<history_chemistry>.true.</history_chemistry>
+<history_chemspecies_srf>.false.</history_chemspecies_srf>
+<history_clubb>.false.</history_clubb>
+<history_waccm>.true.</history_waccm>
+<history_cesm_forcing>.true.</history_cesm_forcing>
+<history_scwaccm_forcing>.true.</history_scwaccm_forcing>
+
+<fexcl1> 'NO2_CMXF' </fexcl1>
+
+<fincl1>
+   'ACTREL', 'AQ_SO2', 'AREA', 'BROX', 'BROY', 'BRY', 'CLOX', 'CLOY', 'CLY',  'NOX', 'NOY', 'TBRY', 'TCLY',  'CFC11STAR',
+   'BTTGWSPEC', 'BTTGWSDF', 'BTTGWSKE', 'CONCLD', 'CME', 'CMFDQ', 'CMFMC', 'CMFMC_DP',
+   'CH3CCL3_CHML', 'CH4_CHML', 'CO2_CHML', 'CO_CHML', 'IVOC_CHML', 'N2O_CHML', 'O3_CHML', 'SO2_CHML',
+   'CO_CHMP', 'O3_CHMP', 'SO2_CHMP',  'TMDMS', 'TMOCS', 'TMSO2','TMso4_a1', 'TMso4_a2', 'TMso4_a3',
+   'soa1_a1_CHML', 'soa1_a2_CHML', 'soa2_a1_CHML', 'soa2_a2_CHML', 'soa3_a1_CHML', 'soa3_a2_CHML',
+   'soa4_a1_CHML', 'soa4_a2_CHML', 'soa5_a1_CHML', 'soa5_a2_CHML', 'SVOC_CHML',
+   'so4_a1_CHMP','so4_a2_CHMP', 'SOAG0_CHMP', 'SOAG1_CHMP', 'SOAG2_CHMP', 'SOAG3_CHMP', 'SOAG4_CHMP', 'TOTH', 'TOT_CLD_VISTAU',
+   'TREFHTMN', 'TREFHTMX', 'TROP_P', 'TROP_T', 'TROP_Z', 'TTEND_TOT',  'TTGWORO',  'TTGWSDF', 'TTGWSDFORO', 'TTGWSKE', 'TTGWSKEORO',
+   'TS', 'TSMN:M', 'TSMX:X', 'BURDENBCdn', 'BURDENDUSTdn', 'BURDENPOMdn', 'BURDENSEASALTdn', 'BURDENSO4dn', 'BURDENSOAdn',
+   'ABSORB', 'AODABSdn', 'AODBCdn', 'AODdnDUST01', 'AODdnDUST02', 'AODdnDUST03', 'AODdn_aitken', 'AODdn_accum', 'AODdn_coarse',
+   'AODDUST02', 'AODDUST', 'AODNIRstdn', 'AODPOMdn', 'AODSO4dn', 'AODSOAdn', 'AODSSdn', 'AODUVdn', 'AODUVstdn', 'AODVIS',
+   'AODVISdn', 'AODVISstdn', 'EXTINCTdn', 'EXTINCTNIRdn', 'EXTINCTUVdn', 'EXTxASYMdn', 'FLDSC', 'FLNR', 'FSNR',
+   'CME', 'CMFDQ', 'CMFMC','CMFMC_DP', 'SOLLD', 'SOLSD', 'SSAVIS', 'SST','TAQ',
+   'DCOCHM','DH2O2CHM', 'DHNO3CHM', 'DO3CHM', 'Dso4_a1CHM', 'Dso4_a2CHM', 'Dso4_a3CHM',
+   'FLASHFRQ', 'LNO_COL_PROD', 'LNO_PROD','KVH_CLUBB','MASS', 'PDELDRY', 'NITROP_PD','PM25', 'PRECT', 'PTEQ', 'PTTEND',
+   'QRLC', 'QRSC', 'QSNOW', 'QRAIN','GS_SO2', 'HNO3_GAS', 'HNO3_NAT', 'HNO3_STS','H2SO4M_C', 'H2SO4_sfnnuc1','HCL_GAS',
+   'SAD_AERO', 'SAD_ICE', 'SAD_LNAT', 'SAD_SULFC', 'SAD_TROP' 'RAD_ICE', 'RAD_LNAT', 'RAD_SULFC', 'REFF_AERO', 'RHREFHT',
+   'EVAPPREC', 'EVAPQZM', 'EVAPTZM', 'FCTL','FREQZM', 'ZMDQ', 'ZMDT', 'ZMMTT', 'ZMMU','VEL_NAT2',
+   'dgnumwet1', 'dgnumwet2', 'dgnumwet3', 'bc_c1DDF', 'bc_c4DDF', 'dst_c1DDF',  'dst_c2DDF',  'dst_c3DDF',
+   'ncl_c1DDF', 'ncl_c2DDF', 'ncl_c3DDF', 'pom_c1DDF', 'pom_c4DDF',   'num_c1DDF','num_c2DDF','num_c3DDF','num_c4DDF',
+   'so4_a1_sfgaex1', 'so4_c1AQH2SO4', 'so4_c1AQSO4', 'so4_c1DDF', 'so4_a2_sfgaex1', 'so4_c2AQH2SO4', 'so4_c2AQSO4', 'so4_c2DDF',
+   'so4_a3_sfgaex1', 'so4_c3AQH2SO4', 'so4_c3AQSO4', 'so4_c3DDF', 'so4_a2_sfnnuc1', 'num_a2_sfnnuc1',
+   'soa1_a1_sfgaex1','soa1_c1DDF', 'soa1_a2_sfgaex1','soa1_c2DDF', 'soa2_a1_sfgaex1','soa2_c1DDF', 'soa2_a2_sfgaex1','soa2_c2DDF',
+   'soa3_a1_sfgaex1','soa3_c1DDF', 'soa3_a2_sfgaex1','soa3_c2DDF', 'soa4_a1_sfgaex1','soa4_c1DDF', 'soa4_a2_sfgaex1','soa4_c2DDF',
+   'soa5_a1_sfgaex1','soa5_c1DDF', 'soa5_a2_sfgaex1','soa5_c2DDF', 'jcl2o2', 'jh2o2', 'jno2', 'jo2_a', 'jo2_b', 'jo3_a', 'jo3_b', 'jpan',
+   'r_het1', 'r_het2', 'r_het3', 'r_het4', 'r_het5', 'r_het6', 'r_het7', 'r_het8', 'r_het9', 'r_het10', 'r_het11', 'r_het12', 'r_het13',
+   'r_het15', 'r_het16', 'r_het17', 'r_jsoa1_a1', 'r_jsoa1_a2', 'r_jsoa2_a1', 'r_jsoa2_a2', 'r_jsoa3_a1', 'r_jsoa3_a2', 'r_jsoa4_a1',
+   'r_jsoa4_a2', 'r_jsoa5_a1', 'r_jsoa5_a2', 'r_GLYOXAL_aer',  'r_HO2_O3', 'r_N2O5_aer', 'r_NO2_aer', 'r_NO3_aer', 'r_O1D_H2O', 'r_OH_O3', 'r_OH_O',
+   'O3_Prod','O3_Loss','O3S_Loss','RO2_NO_sum','O3_alkenes','RO2_NO3_sum','RO2_HO2_sum','RO2_RO2_sum','RCO2_NO2_sum',
+   'OddOx_Ox_Loss','OddOx_HOx_Loss','OddOx_NOx_Loss','OddOx_CLOxBROx_Loss','OddOx_Loss_Tot','OddOx_Prod_Tot', 'Ox_Prod','Ox_Loss'
+</fincl1>
+
+<fincl2>
+   'ACTNL', 'ACTREL', 'BURDENBCdn', 'BURDENDUSTdn', 'BURDENPOMdn', 'BURDENSEASALTdn', 'BURDENSO4dn', 'BURDENSOAdn', 'BUTGWSPEC',
+   'CDNUMC', 'CLDICE', 'CLDLIQ', 'CLDTOT', 'CLOUD', 'CMFMC', 'CMFMC_DP', 'FCTL', 'FLDS', 'FLDSC', 'FLNR', 'FLNS', 'FLNSC',
+   'FLNT', 'FLNTC', 'FLUT', 'FLUTC', 'FSDS', 'FSDSC', 'FSNR', 'FSNS', 'FSNSC', 'FSNTOA', 'FSNTOAC', 'LHFLX', 'MASS', 'O3', 'OMEGA',
+   'OMEGA500', 'PBLH', 'PDELDRY', 'PM25_SRF', 'PRECC', 'PRECT', 'PS', 'PSL', 'Q', 'QREFHT', 'QSNOW', 'RELHUM', 'RHREFHT', 'SHFLX',
+   'SOLIN', 'SOLLD', 'SOLSD', 'T', 'T500', 'T700', 'T850', 'TAUBLJX', 'TAUBLJY', 'TAUGWX', 'TAUGWY', 'TAUX', 'TAUY',
+   'TGCLDIWP', 'TGCLDLWP', 'TMQ', 'TREFHT', 'TREFHTMN', 'TREFHTMX', 'TS', 'TSMN:M', 'TSMX:X', 'U', 'U10', 'UTGWORO', 'UTGWSPEC',
+   'V', 'Z3', 'Z500'
+</fincl2>
+
+<fincl7 dyn="fv">
+         'MSKtem','PS','PSL','VTHzm','UVzm','UWzm','Uzm','Vzm','THzm','Wzm','PHIS'
+</fincl7>
+<fincl8>
+         'PS', 'PSL', 'U', 'V', 'T', 'Z3', 'PHIS', 'FRONTGF:I', 'OMEGA', 'O3', 'REFF_AERO', 'SAD_AERO',
+         'so4_a1', 'so4_a2', 'so4_a3', 'AODVISstdn', 'NITROP_PD', 'dgnumwet1', 'dgnumwet2', 'dgnumwet3', 'QRS_TOT', 'CO2', 'H', 'NO', 'O'
+</fincl8>
+
+</namelist_defaults>
