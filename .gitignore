@@ -8,6 +8,8 @@
 # generated python files
 *.pyc
 __pycache__
+.gitignore 
+.gitmodules
 
 # ignore for the merge to master and orphaning of the gh-pages branch
 doc/build
