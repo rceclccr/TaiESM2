@@ -11,3 +11,7 @@ __pycache__
 
 # ignore for the merge to master and orphaning of the gh-pages branch
 doc/build
+
+# local directories
+.github/
+.lib/
