@@ -1,0 +1,502 @@
+module test_shr_string
+
+  ! Tests of shr_string_mod
+
+  use funit
+  use shr_string_mod
+
+  implicit none
+
+  integer, parameter :: list_len = 256
+  character, parameter :: tab_char = char(9)
+
+contains
+
+  ! ------------------------------------------------------------------------
+  ! Tests of shr_string_withoutSuffix
+  ! ------------------------------------------------------------------------
+
+  @Test
+  subroutine test_shr_string_withoutSuffix_suffixAbsent()
+    character(len=8) :: in_str
+    character(len=8) :: out_str
+    logical :: has_suffix
+
+    in_str = "test_foo"
+    call shr_string_withoutSuffix( &
+         in_str = in_str, &
+         suffix = "_str", &
+         has_suffix = has_suffix, &
+         out_str = out_str)
+
+    @assertFalse(has_suffix)
+    @assertEqual(in_str, out_str)
+  end subroutine test_shr_string_withoutSuffix_suffixAbsent
+
+  @Test
+  subroutine test_shr_string_withoutSuffix_endsWithSuffix()
+    character(len=8) :: in_str
+    character(len=8) :: out_str
+    logical :: has_suffix
+
+    in_str = "test_str"
+    call shr_string_withoutSuffix( &
+         in_str = in_str, &
+         suffix = "_str", &
+         has_suffix = has_suffix, &
+         out_str = out_str)
+
+    @assertTrue(has_suffix)
+    @assertEqual("test", out_str)
+  end subroutine test_shr_string_withoutSuffix_endsWithSuffix
+
+  @Test
+  subroutine test_shr_string_withoutSuffix_endsWithSuffixPlusWhitespace()
+    character(len=10) :: in_str
+    character(len=10) :: out_str
+    logical :: has_suffix
+
+    in_str = "test_str  "
+    call shr_string_withoutSuffix( &
+         in_str = in_str, &
+         suffix = "_str", &
+         has_suffix = has_suffix, &
+         out_str = out_str)
+
+    @assertTrue(has_suffix)
+    @assertEqual("test", out_str)
+  end subroutine test_shr_string_withoutSuffix_endsWithSuffixPlusWhitespace
+
+  @Test
+  subroutine test_shr_string_withoutSuffix_suffixInMiddle()
+    character(len=10) :: in_str
+    character(len=10) :: out_str
+    logical :: has_suffix
+
+    in_str = "test_str_1"
+    call shr_string_withoutSuffix( &
+         in_str = in_str, &
+         suffix = "_str", &
+         has_suffix = has_suffix, &
+         out_str = out_str)
+
+    @assertFalse(has_suffix)
+    @assertEqual(in_str, out_str)
+  end subroutine test_shr_string_withoutSuffix_suffixInMiddle
+
+  @Test
+  subroutine test_shr_string_withoutSuffix_stringIsSuffix()
+    ! Note that has_suffix is set to false if the input string exactly matches the suffix.
+    ! It's debatable what the behavior should be in this situation, but we have chosen to
+    ! set has_suffix to false in this case because it's easier to implement and avoids
+    ! passing back a 0-length string, which might cause problems.
+    character(len=8) :: in_str
+    character(len=8) :: out_str
+    logical :: has_suffix
+
+    in_str = "_str    "
+    call shr_string_withoutSuffix( &
+         in_str = in_str, &
+         suffix = "_str", &
+         has_suffix = has_suffix, &
+         out_str = out_str)
+
+    @assertFalse(has_suffix)
+    @assertEqual(in_str, out_str)
+  end subroutine test_shr_string_withoutSuffix_stringIsSuffix
+
+  @Test
+  subroutine test_shr_string_withoutSuffix_suffixLongerThanStr()
+    character(len=8) :: in_str
+    character(len=8) :: out_str
+    logical :: has_suffix
+
+    ! The suffix is longer than the trimmed length of the string (though not longer than
+    ! the full string length)
+    in_str = "t       "
+    call shr_string_withoutSuffix( &
+         in_str = in_str, &
+         suffix = "_str", &
+         has_suffix = has_suffix, &
+         out_str = out_str)
+
+    @assertFalse(has_suffix)
+    @assertEqual(in_str, out_str)
+  end subroutine test_shr_string_withoutSuffix_suffixLongerThanStr
+
+  ! ------------------------------------------------------------------------
+  ! Tests of shr_string_leftAlign_and_convert_tabs
+  ! ------------------------------------------------------------------------
+
+  @Test
+  subroutine test_shr_string_leftAlign_noInitialSpaces()
+    ! With no initial spaces, should have no effect
+    character(len=6) :: str
+
+    str = 'foo   '
+    call shr_string_leftAlign_and_convert_tabs(str)
+    @assertEqual('foo   ', str, whitespace=KEEP_ALL)
+  end subroutine test_shr_string_leftAlign_noInitialSpaces
+
+  @Test
+  subroutine test_shr_string_leftAlign_initialSpacesAndTabs()
+    ! Should remove an initial mix of spaces and tabs
+    character(len=8) :: str
+
+    str = ' ' // tab_char // ' ' // tab_char // ' ' // 'foo'
+    call shr_string_leftAlign_and_convert_tabs(str)
+    @assertEqual('foo     ', str, whitespace=KEEP_ALL)
+  end subroutine test_shr_string_leftAlign_initialSpacesAndTabs
+
+  @Test
+  subroutine test_shr_string_leftAlign_interiorSpaces()
+    ! Should NOT remove interior spaces
+    character(len=6) :: str
+
+    str = 'f oo  '
+    call shr_string_leftAlign_and_convert_tabs(str)
+    @assertEqual('f oo  ', str, whitespace=KEEP_ALL)
+  end subroutine test_shr_string_leftAlign_interiorSpaces
+
+  @Test
+  subroutine test_shr_string_leftAlign_interiorTabs()
+    ! Convert interior tabs to spaces
+    character(len=6) :: str, expected
+
+    str = 'f' // tab_char // 'oo  '
+    expected = 'f oo '
+    call shr_string_leftAlign_and_convert_tabs(str)
+    @assertEqual(expected, str, whitespace=KEEP_ALL)
+  end subroutine test_shr_string_leftAlign_interiorTabs
+
+  ! ------------------------------------------------------------------------
+  ! Tests of shr_string_listIsValid
+  ! ------------------------------------------------------------------------
+
+  @Test
+  subroutine test_shr_string_listIsValid_emptyList()
+     ! An empty list should be considered invalid
+     character(len=32) :: list
+     logical :: is_valid
+     integer :: rc
+
+     list = ""
+     is_valid = shr_string_listIsValid(list, rc)
+     @assertFalse(is_valid)
+     @assertNotEqual(rc, 0)
+  end subroutine test_shr_string_listIsValid_emptyList
+
+  @Test
+  subroutine test_shr_string_listIsValid_firstCharDelimiter()
+     ! An list where the first character is a delimiter should be considered invalid
+     character(len=32) :: list
+     logical :: is_valid
+     integer :: rc
+
+     list = ":ab:cd"
+     is_valid = shr_string_listIsValid(list, rc)
+     @assertFalse(is_valid)
+     @assertNotEqual(rc, 0)
+  end subroutine test_shr_string_listIsValid_firstCharDelimiter
+
+  @Test
+  subroutine test_shr_string_listIsValid_lastCharDelimiter()
+     ! An list where the last character is a delimiter should be considered invalid
+     character(len=32) :: list
+     logical :: is_valid
+     integer :: rc
+
+     list = "ab:cd:"
+     is_valid = shr_string_listIsValid(list, rc)
+     @assertFalse(is_valid)
+     @assertNotEqual(rc, 0)
+  end subroutine test_shr_string_listIsValid_lastCharDelimiter
+
+  @Test
+  subroutine test_shr_string_listIsValid_whitespace()
+     ! An list where there is whitespace in the middle of a field name should be
+     ! considered invalid
+     character(len=32) :: list
+     logical :: is_valid
+     integer :: rc
+
+     list = "ab:c d:ef"
+     is_valid = shr_string_listIsValid(list, rc)
+     @assertFalse(is_valid)
+     @assertNotEqual(rc, 0)
+  end subroutine test_shr_string_listIsValid_whitespace
+
+  @Test
+  subroutine test_shr_string_listIsValid_zeroLengthField()
+     ! An list with a zero-length field should be considered invalid
+     character(len=32) :: list
+     logical :: is_valid
+     integer :: rc
+
+     list = "ab::ef"
+     is_valid = shr_string_listIsValid(list, rc)
+     @assertFalse(is_valid)
+     @assertNotEqual(rc, 0)
+  end subroutine test_shr_string_listIsValid_zeroLengthField
+
+  @Test
+  subroutine test_shr_string_listIsValid_oneField()
+     ! An list with a single field should be considered valid
+     character(len=32) :: list
+     logical :: is_valid
+     integer :: rc
+
+     list = "ab"
+     is_valid = shr_string_listIsValid(list, rc)
+     @assertTrue(is_valid)
+     @assertEqual(rc, 0)
+  end subroutine test_shr_string_listIsValid_oneField
+
+  @Test
+  subroutine test_shr_string_listIsValid_twoFields()
+     ! An list with two fields should be considered valid
+     character(len=32) :: list
+     logical :: is_valid
+     integer :: rc
+
+     list = "ab:cd"
+     is_valid = shr_string_listIsValid(list, rc)
+     @assertTrue(is_valid)
+     @assertEqual(rc, 0)
+  end subroutine test_shr_string_listIsValid_twoFields
+
+  @Test
+  subroutine test_shr_string_listIsValid_threeFields()
+     ! An list with three fields should be considered valid
+     character(len=32) :: list
+     logical :: is_valid
+     integer :: rc
+
+     list = "ab:cd:ef"
+     is_valid = shr_string_listIsValid(list, rc)
+     @assertTrue(is_valid)
+     @assertEqual(rc, 0)
+  end subroutine test_shr_string_listIsValid_threeFields
+
+  ! ------------------------------------------------------------------------
+  ! Tests of shr_string_listGetAllNames
+  ! ------------------------------------------------------------------------
+
+  @Test
+  subroutine test_shr_string_listGetAllNames_length1strlen1()
+    ! Test shr_string_listGetAllNames with a single-element list, with string length 1
+    character(len=32) :: list
+    character(len=4), allocatable :: names(:)
+    integer :: rc
+    character(len=4), parameter :: expected_names(1) = ["x   "]
+
+    list = "x"
+    call shr_string_listGetAllNames(list, names, rc)
+    @assertEqual(0, rc)
+    @assertEqual(1, size(names))
+    @assertEqual(expected_names, names)
+  end subroutine test_shr_string_listGetAllNames_length1strlen1
+
+  @Test
+  subroutine test_shr_string_listGetAllNames_length1strlen3()
+    ! Test shr_string_listGetAllNames with a single-element list, with string length 3
+    character(len=32) :: list
+    character(len=4), allocatable :: names(:)
+    integer :: rc
+    character(len=4), parameter :: expected_names(1) = ["xyz "]
+
+    list = "xyz"
+    call shr_string_listGetAllNames(list, names, rc)
+    @assertEqual(0, rc)
+    @assertEqual(1, size(names))
+    @assertEqual(expected_names, names)
+  end subroutine test_shr_string_listGetAllNames_length1strlen3
+
+  @Test
+  subroutine test_shr_string_listGetAllNames_length5strlen1()
+    ! Test shr_string_listGetAllNames with a 5-element list, with string length 1
+    character(len=32) :: list
+    character(len=4), allocatable :: names(:)
+    integer :: rc
+    character(len=4), parameter :: expected_names(5) = ["a   ", "b   ", "c   ", "d   ", "e   "]
+
+    list = "a:b:c:d:e"
+    call shr_string_listGetAllNames(list, names, rc)
+    @assertEqual(0, rc)
+    @assertEqual(5, size(names))
+    @assertEqual(expected_names, names)
+  end subroutine test_shr_string_listGetAllNames_length5strlen1
+
+  @Test
+  subroutine test_shr_string_listGetAllNames_length5strlenVaries()
+    ! Test shr_string_listGetAllNames with a 5-element list, with varying string length
+    character(len=32) :: list
+    character(len=4), allocatable :: names(:)
+    integer :: rc
+    ! Note that one of the names here hits the max strlen of names (4), which tests to
+    ! make sure we don't inappropriately abort for that max length.
+    character(len=4), parameter :: expected_names(5) = ["abc ", "defg", "hi  ", "j   ", "klm "]
+
+    list = "abc:defg:hi:j:klm"
+    call shr_string_listGetAllNames(list, names, rc)
+    @assertEqual(0, rc)
+    @assertEqual(5, size(names))
+    @assertEqual(expected_names, names)
+  end subroutine test_shr_string_listGetAllNames_length5strlenVaries
+
+  @Test
+  subroutine test_shr_string_listGetAllNames_tooLong()
+    ! Test shr_string_listGetAllNames with a too-long element
+    character(len=32) :: list
+    character(len=4), allocatable :: names(:)
+    integer :: rc
+
+    list = "abc:defgh:ijk"
+    call shr_string_listGetAllNames(list, names, rc)
+    @assertExceptionRaised("ABORTED: (shr_string_listGetAllNames)  ERROR: an element of list <abc:defgh:ijk> exceeds the max char length of the output variable")
+  end subroutine test_shr_string_listGetAllNames_tooLong
+
+  ! ------------------------------------------------------------------------
+  ! Tests of shr_string_listDiff
+  ! ------------------------------------------------------------------------
+
+  @Test
+  subroutine test_shr_string_listDiff_default()
+    character(len=list_len) :: actual
+
+    call shr_string_listDiff( &
+         list1 = 'first:second:third:fourth', &
+         list2 = 'fourth:second', &
+         listout = actual)
+    @assertEqual('first:third', actual)
+  end subroutine test_shr_string_listDiff_default
+
+  @Test
+  subroutine test_shr_string_listDiff_oneElementList2()
+    ! Make sure that it correctly handles the edge case of a single element in list2
+    ! (i.e., with no delimiters).
+    character(len=list_len) :: actual
+
+    call shr_string_listDiff( &
+         list1 = 'first:second:third:fourth', &
+         list2 = 'third', &
+         listout = actual)
+    @assertEqual('first:second:fourth', actual)
+  end subroutine test_shr_string_listDiff_oneElementList2
+
+  @Test
+  subroutine test_shr_string_listDiff_emptyList2()
+    character(len=list_len) :: actual
+
+    call shr_string_listDiff( &
+         list1 = 'first:second:third:fourth', &
+         list2 = ' ', &
+         listout = actual)
+    @assertEqual('first:second:third:fourth', actual)
+  end subroutine test_shr_string_listDiff_emptyList2
+
+  @Test
+  subroutine test_shr_string_listDiff_List2equalsList1()
+    character(len=list_len) :: actual
+
+    call shr_string_listDiff( &
+         list1 = 'first:second:third:fourth', &
+         list2 = 'fourth:second:first:third', &  ! same as list1, but different order
+         listout = actual)
+    @assertEqual(' ', actual)
+  end subroutine test_shr_string_listDiff_List2equalsList1
+
+  @Test
+  subroutine test_shr_string_listDiff_elementNotInList1()
+    character(len=list_len) :: actual
+
+    call shr_string_listDiff( &
+         list1 = 'first:second:third:fourth', &
+         list2 = 'fifth', &
+         listout = actual)
+    @assertEqual('first:second:third:fourth', actual)
+  end subroutine test_shr_string_listDiff_elementNotInList1
+
+  ! ------------------------------------------------------------------------
+  ! Tests of shr_string_listFromSuffixes
+  ! ------------------------------------------------------------------------
+
+  @Test
+  subroutine test_shr_string_listFromSuffixes_with_1()
+    ! 1 suffix -> list of length 1
+    character(len=list_len) :: actual
+
+    actual = shr_string_listFromSuffixes(suffixes = ['_s1'], strBase = 'foo')
+    @assertEqual('foo_s1', actual)
+  end subroutine test_shr_string_listFromSuffixes_with_1
+
+  @Test
+  subroutine test_shr_string_listFromSuffixes_with_3()
+    ! 3 suffixes -> list of length 3
+    character(len=list_len) :: actual
+
+    actual = shr_string_listFromSuffixes(suffixes = ['_s1', '_s2', '_s3'], strBase = 'foo')
+    @assertEqual('foo_s1:foo_s2:foo_s3', actual)
+  end subroutine test_shr_string_listFromSuffixes_with_3
+
+  ! ------------------------------------------------------------------------
+  ! Tests of shr_string_listCreateField
+  ! ------------------------------------------------------------------------
+
+  @Test
+  subroutine test_shr_string_listCreateField_basic()
+    character(len=list_len) :: actual, expected
+
+    actual = shr_string_listCreateField(fieldN = 5, strBase = 'LAI')
+    expected = 'LAI_1:LAI_2:LAI_3:LAI_4:LAI_5'
+    @assertEqual(expected, actual)
+  end subroutine test_shr_string_listCreateField_basic
+
+  @Test
+  subroutine test_shr_string_listCreateField_changeField1()
+    character(len=list_len) :: actual, expected
+
+    actual = shr_string_listCreateField(fieldN = 5, strBase = 'LAI', field1 = 3)
+    expected = 'LAI_3:LAI_4:LAI_5'
+    @assertEqual(expected, actual)
+  end subroutine test_shr_string_listCreateField_changeField1
+
+  ! ------------------------------------------------------------------------
+  ! Tests of shr_string_listAddSuffix
+  ! ------------------------------------------------------------------------
+
+  @Test
+  subroutine test_shr_string_listAddSuffix_with_empty_list()
+    character(len=list_len) :: actual
+
+    call shr_string_listAddSuffix(list=' ', suffix='00', new_list=actual)
+    @assertEqual(' ', actual)
+  end subroutine test_shr_string_listAddSuffix_with_empty_list
+
+  @Test
+  subroutine test_shr_string_listAddSuffix_with_one_element()
+    character(len=list_len) :: actual
+
+    call shr_string_listAddSuffix(list='first', suffix='00', new_list=actual)
+    @assertEqual('first00', actual)
+  end subroutine test_shr_string_listAddSuffix_with_one_element
+
+  @Test
+  subroutine test_shr_string_listAddSuffix_with_multiple_elements()
+    character(len=list_len) :: actual, expected
+
+    call shr_string_listAddSuffix(list='first:second:third', suffix='00', new_list=actual)
+    expected = 'first00:second00:third00'
+    @assertEqual(expected, actual)
+  end subroutine test_shr_string_listAddSuffix_with_multiple_elements
+
+  @Test
+  subroutine test_shr_string_listAddSuffix_with_empty_suffix()
+    character(len=list_len) :: actual, expected
+
+    call shr_string_listAddSuffix(list='first:second:third', suffix=' ', new_list=actual)
+    expected = 'first:second:third'
+    @assertEqual(expected, actual)
+  end subroutine test_shr_string_listAddSuffix_with_empty_suffix
+
+end module test_shr_string

@@ -1,0 +1,12 @@
+# Ignore python bytecode files
+*.pyc
+buildnmlc
+buildlib.*c
+buildlib.csm_sharec
+
+# Ignore emacs backup files
+*~
+
+# Typical directory used for unit test build
+/unit_tests.temp/
+
