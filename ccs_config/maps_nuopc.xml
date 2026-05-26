@@ -1,0 +1,230 @@
+<?xml version="1.0"?>
+
+<gridmaps>
+
+    <!-- ======================================================== -->
+    <!--- river to ocn -->
+    <!-- ======================================================== -->
+
+    <gridmap rof_grid="rx1" ocn_grid="gx3v7" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/gridmaps/rx1/map_rx1_to_gx3v7_nnsm_e1000r500_180430.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/gridmaps/rx1/map_rx1_to_gx3v7_nnsm_e1000r500_180430.nc</map>
+    </gridmap>
+    <gridmap rof_grid="rx1" ocn_grid="gx1v6" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/gridmaps/rx1/map_rx1_to_gx1v6_nn_open_ocean_nnsm_e1000r300_marginal_sea_170503.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/gridmaps/rx1/map_rx1_to_gx1v6_nnsm_e1000r300_170503.nc</map>
+    </gridmap>
+    <gridmap rof_grid="rx1" ocn_grid="gx1v7" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/gridmaps/rx1/map_rx1_to_gx1v7_nn_open_ocean_nnsm_e1000r300_marginal_sea_170413.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/gridmaps/rx1/map_rx1_to_gx1v7_nnsm_e1000r300_170413.nc</map>
+    </gridmap>
+    <gridmap rof_grid="rx1" ocn_grid="tx1v1" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/gridmaps/rx1/map_rx1_to_tx1v1_e1000r300_161214.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/gridmaps/rx1/map_rx1_to_tx1v1_e1000r300_161214.nc</map>
+    </gridmap>
+    <gridmap rof_grid="rx1" ocn_grid="tx0.66v1" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/gridmaps/rx1/map_rx1_to_tx0.66v1_nnsm_e1000r300_190315.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/gridmaps/rx1/map_rx1_to_tx0.66v1_nnsm_e1000r300_190315.nc</map>
+    </gridmap>
+    <gridmap rof_grid="rx1" ocn_grid="tx0.1v2" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/cpl6/map_rx1_to_tx0.1v2_e1000r200_090624.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/cpl6/map_rx1_to_tx0.1v2_e1000r200_090624.nc</map>
+    </gridmap>
+    <gridmap rof_grid="rx1" ocn_grid="tx0.1v3" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/cpl6/map_rx1_to_tx0.1v3_nnsm_e1000r200_170914.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/cpl6/map_rx1_to_tx0.1v3_nnsm_e1000r200_170914.nc</map>
+    </gridmap>
+    <gridmap rof_grid="r05" ocn_grid="gx3v7" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/gridmaps/r05/map_r05_to_gx3v7_nnsm_e1000r500_180430.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/gridmaps/r05/map_r05_to_gx3v7_nnsm_e1000r500_180430.nc</map>
+    </gridmap>
+    <gridmap rof_grid="r05" ocn_grid="gx1v6" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/gridmaps/r05/map_r05_to_gx1v6_nn_open_ocean_nnsm_e1000r300_marginal_sea_170503.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/gridmaps/r05/map_r05_to_gx1v6_nnsm_e1000r300_170503.nc</map>
+    </gridmap>
+    <gridmap rof_grid="r05" ocn_grid="gx1v7" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/gridmaps/r05/map_r05_to_gx1v7_nn_open_ocean_nnsm_e1000r300_marginal_sea_170413.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/gridmaps/r05/map_r05_to_gx1v7_nnsm_e1000r300_170413.nc</map>
+    </gridmap>
+    <gridmap rof_grid="r05" ocn_grid="tx1v1" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/gridmaps/r05/map_r05_to_tx1v1_e1000r500_161214.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/gridmaps/r05/map_r05_to_tx1v1_e1000r500_161214.nc</map>
+    </gridmap>
+    <gridmap rof_grid="r05" ocn_grid="tx0.1v2" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/cpl6/map_r05_to_tx0.1v2_r500e1000_080620.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/cpl6/map_r05_to_tx0.1v2_r500e1000_080620.nc</map>
+    </gridmap>
+    <gridmap rof_grid="r01" ocn_grid="gx1v6" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/cpl6/map_r01_to_gx1v6_120711.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/cpl6/map_r01_to_gx1v6_120711.nc</map>
+    </gridmap>
+    <gridmap rof_grid="JRA025v2" ocn_grid="gx1v7" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/gridmaps/rJRA025/map_JRA025m_to_gx1v7_nn_open_ocean_nnsm_e1000r300_marginal_sea_190214.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/gridmaps/rJRA025/map_JRA025m_to_gx1v7_e1000r300_190214.nc</map>
+    </gridmap>
+    <gridmap rof_grid="JRA025" ocn_grid="gx1v7" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/gridmaps/rJRA025/map_JRA025m_to_gx1v7_nn_open_ocean_nnsm_e1000r300_marginal_sea_170801.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/gridmaps/rJRA025/map_JRA025m_to_gx1v7_e1000r300_170801.nc</map>
+    </gridmap>
+    <gridmap rof_grid="JRA025" ocn_grid="tx0.1v2" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/gridmaps/rJRA025/map_JRA025m_to_tx0.1v2_e333r100_170619.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/gridmaps/rJRA025/map_JRA025m_to_tx0.1v2_e333r100_170619.nc</map>
+    </gridmap>
+    <gridmap rof_grid="JRA025v2" ocn_grid="tx0.1v3" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/gridmaps/rJRA025/map_JRA025m_to_tx0.1v3_nnsm_e333r100_190226.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/gridmaps/rJRA025/map_JRA025m_to_tx0.1v3_nnsm_e333r100_190226.nc</map>
+    </gridmap>
+    <gridmap rof_grid="JRA025" ocn_grid="tx0.1v3" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/gridmaps/rJRA025/map_JRA025m_to_tx0.1v3_e333r100_170830.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/gridmaps/rJRA025/map_JRA025m_to_tx0.1v3_e333r100_170830.nc</map>
+    </gridmap>
+    <gridmap rof_grid="r05" ocn_grid="tx0.66v1" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/gridmaps/r05/map_r05_to_tx0.66v1_e1000r300_190314.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/gridmaps/r05/map_r05_to_tx0.66v1_e1000r300_190314.nc</map>
+    </gridmap>
+    <gridmap rof_grid="r05" ocn_grid="tx2_3v2" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/gridmaps/r05/map_r05_to_tx2_3_nnsm_e250r250_230914.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/gridmaps/r05/map_r05_to_tx2_3_nnsm_e1000r1000_230415.nc</map>
+    </gridmap>
+    <gridmap rof_grid="JRA025" ocn_grid="tx0.66v1" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/gridmaps/rJRA025/map_JRA025m_to_tx0.66v1_nnsm_e333r100_190910.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/gridmaps/rJRA025/map_JRA025m_to_tx0.66v1_nnsm_e333r100_190910.nc</map>
+    </gridmap>
+    <gridmap rof_grid="JRA025" ocn_grid="tx2_3v2" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/gridmaps/rJRA025/map_jra_to_tx2_3_nnsm_e250r250_241211.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/gridmaps/rJRA025/map_jra_to_tx2_3_nnsm_e250r250_241211.nc</map>
+    </gridmap>
+    <gridmap rof_grid="r05" ocn_grid="tx2_3v3" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/gridmaps/r05/map_r05_to_tx2_3v3_nnsm_e100r100_260306.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/gridmaps/r05/map_r05_to_tx2_3v3_nnsm_e100r100sh_e250r250nh_merged_modified_260317.nc</map>
+    </gridmap>
+    <gridmap rof_grid="JRA025" ocn_grid="tx2_3v3" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">cpl/gridmaps/rJRA025/map_JRA025m_to_tx2_3v3_nnsm_e100r100_260306.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">cpl/gridmaps/rJRA025/map_JRA025m_to_tx2_3v3_nnsm_e100r100sh_e250r250nh_merged_260307.nc</map>
+    </gridmap>
+    <gridmap rof_grid="rx1" ocn_grid="oQU480" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">rof/remap/wght_file_drof_qu480.250721.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">rof/remap/wght_file_drof_qu480.250721.nc</map>
+    </gridmap>
+    <gridmap rof_grid="r05" ocn_grid="oQU480" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">rof/remap/wght_file_mosart_qu480.250721.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">rof/remap/wght_file_mosart_qu480.250721.nc</map>
+    </gridmap>
+    <gridmap rof_grid="rx1" ocn_grid="oQU120" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">rof/remap/wght_file_drof_qu120.230123.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">rof/remap/wght_file_drof_qu120.230123.nc</map>
+    </gridmap>
+    <gridmap rof_grid="r05" ocn_grid="oQU120" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">rof/remap/wght_file_mosart_qu120.230123.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">rof/remap/wght_file_mosart_qu120.230123.nc</map>
+    </gridmap>
+    <gridmap rof_grid="r05" ocn_grid="oQU060" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">rof/remap/wght_file_mosart_qu060.241221.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">rof/remap/wght_file_mosart_qu060.241221.nc</map>
+    </gridmap>
+    <gridmap rof_grid="JRA025v2" ocn_grid="oQU120" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">rof/remap/wght_file_jra_qu120.230517.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">rof/remap/wght_file_jra_qu120.230517.nc</map>
+    </gridmap>
+    <gridmap rof_grid="JRA025v2" ocn_grid="oQU060" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">rof/remap/wght_file_jra_qu060.241221.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">rof/remap/wght_file_jra_qu060.241221.nc</map>
+    </gridmap>
+    <gridmap rof_grid="r05" ocn_grid="oQU030" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">rof/remap/wght_file_mosart_qu030.241221.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">rof/remap/wght_file_mosart_qu030.241221.nc</map>
+    </gridmap>
+    <gridmap rof_grid="JRA025v2" ocn_grid="oQU030" >
+      <map name="ROF2OCN_LIQ_RMAPNAME">rof/remap/wght_file_jra_qu030.241221.nc</map>
+      <map name="ROF2OCN_ICE_RMAPNAME">rof/remap/wght_file_jra_qu030.241221.nc</map>
+    </gridmap>
+
+    <!-- ======================================================== -->
+    <!-- MizuRoute mapping files -->
+    <!-- ======================================================== -->
+
+    <!-- By default NUOPC mapping is done on the fly, so mapping files do NOT need to be created to go between grids -->
+    <!-- The exception to this are when mapping files need to be created to cut down on the time, CPU, and memory requirements
+         for creating remapping on the fly -->
+
+    <!-- f19 grids -->
+    <gridmap lnd_grid="1.9x2.5" rof_grid="HDMAmz">
+      <!-- These mapping files were NOT created using ESMF as ESMF regridding failed, but with an offline python script -->
+      <!-- They were then converted to SCRIP mapping file format so they could be read by cime -->
+      <map name="LND2ROF_FMAPNAME">rof/mizuRoute/gridmaps/map_f19_TO_HDMAmz_aave.200901.nc</map>
+      <map name="ROF2LND_FMAPNAME">rof/mizuRoute/gridmaps/map_HDMAmz_TO_f19_aave.200901.nc</map>
+    </gridmap>
+    <gridmap lnd_grid="1.9x2.5" rof_grid="HDMA_lake_mz">
+      <!-- These mapping files were NOT created using ESMF as ESMF regridding failed, but with an offline python script -->
+      <!-- They were then converted to SCRIP mapping file format so they could be read by cime -->
+      <map name="LND2ROF_FMAPNAME">rof/mizuRoute/gridmaps/map_f19_TO_HDMAlakemz_aave_cdf5.221117.nc</map>
+      <map name="ROF2LND_FMAPNAME">rof/mizuRoute/gridmaps/map_HDMAlakemz_TO_f19_aave_cdf5.221117.nc</map>
+    </gridmap>
+    <gridmap lnd_grid="1.9x2.5" rof_grid="MERITmz">
+      <!-- These mapping files were NOT created using ESMF as ESMF regridding failed, but with an offline python script -->
+      <!-- They were then converted to SCRIP mapping file format so they could be read by cime -->
+      <map name="LND2ROF_FMAPNAME">rof/mizuRoute/gridmaps/map_f19_TO_MERITmz_aave.210103.nc</map>
+      <map name="ROF2LND_FMAPNAME">rof/mizuRoute/gridmaps/map_MERITmz_TO_f19_aave.210103.nc</map>
+    </gridmap>
+
+    <!-- f09 grids -->
+    <gridmap lnd_grid="0.9x1.25" rof_grid="HDMAmz">
+      <!-- These mapping files were NOT created using ESMF as ESMF regridding failed, but with an offline python script -->
+      <!-- They were then converted to SCRIP mapping file format so they could be read by cime -->
+      <map name="LND2ROF_FMAPNAME">rof/mizuRoute/gridmaps/map_f09_TO_HDMAmz_aave.210321.nc</map>
+      <map name="ROF2LND_FMAPNAME">rof/mizuRoute/gridmaps/map_HDMAmz_TO_f09_aave.210321.nc</map>
+    </gridmap>
+    <gridmap lnd_grid="0.9x1.25" rof_grid="HDMA_lake_mz">
+      <!-- These mapping files were NOT created using ESMF as ESMF regridding failed, but with an offline python script -->
+      <!-- They were then converted to SCRIP mapping file format so they could be read by cime -->
+      <map name="LND2ROF_FMAPNAME">rof/mizuRoute/gridmaps/map_f09_TO_HDMAlakemz_aave_cdf5.221117.nc</map>
+      <map name="ROF2LND_FMAPNAME">rof/mizuRoute/gridmaps/map_HDMAlakemz_TO_f09_aave_cdf5.221117.nc</map>
+    </gridmap>
+    <gridmap lnd_grid="0.9x1.25" rof_grid="MERITmz">
+      <!-- These mapping files were NOT created using ESMF as ESMF regridding failed, but with an offline python script -->
+      <!-- They were then converted to SCRIP mapping file format so they could be read by cime -->
+      <map name="LND2ROF_FMAPNAME">rof/mizuRoute/gridmaps/map_f09_TO_MERITmz_aave.210320.nc</map>
+      <map name="ROF2LND_FMAPNAME">rof/mizuRoute/gridmaps/map_MERITmz_TO_f09_aave.210320.nc</map>
+    </gridmap>
+
+    <!-- hcru grids -->
+    <gridmap lnd_grid="360x720cru" rof_grid="HDMAmz">
+      <!-- These mapping files were NOT created using ESMF as ESMF regridding failed, but with an offline python script -->
+      <!-- They were then converted to SCRIP mapping file format so they could be read by cime -->
+      <map name="LND2ROF_FMAPNAME">rof/mizuRoute/gridmaps/map_hcru_TO_HDMAmz_aave.210924.nc</map>
+      <map name="ROF2LND_FMAPNAME">rof/mizuRoute/gridmaps/map_HDMAmz_TO_hcru_aave.210924.nc</map>
+    </gridmap>
+    <gridmap lnd_grid="360x720cru" rof_grid="HDMA_lake_mz">
+      <!-- These mapping files were NOT created using ESMF as ESMF regridding failed, but with an offline python script -->
+      <!-- They were then converted to SCRIP mapping file format so they could be read by cime -->
+      <map name="LND2ROF_FMAPNAME">rof/mizuRoute/gridmaps/map_hcru_TO_HDMAlakemz_aave_cdf5.221117.nc</map>
+      <map name="ROF2LND_FMAPNAME">rof/mizuRoute/gridmaps/map_HDMAlakemz_TO_hcru_aave_cdf5.221117.nc</map>
+    </gridmap>
+    <gridmap lnd_grid="360x720cru" rof_grid="MERITmz">
+      <!-- These mapping files were NOT created using ESMF as ESMF regridding failed, but with an offline python script -->
+      <!-- They were then converted to SCRIP mapping file format so they could be read by cime -->
+      <map name="LND2ROF_FMAPNAME">rof/mizuRoute/gridmaps/map_hcru_TO_MERITmz_aave.210909.nc</map>
+      <map name="ROF2LND_FMAPNAME">rof/mizuRoute/gridmaps/map_MERITmz_TO_hcru_aave.210909.nc</map>
+    </gridmap>
+
+    <!-- NLDAS2 grids -->
+    <gridmap lnd_grid="0.125nldas2" rof_grid="HDMA_CONUSmz">
+      <map name="LND2ROF_FMAPNAME">rof/mizuRoute/gridmaps/map_0.125nldas2_TO_HDMAmz_CONUS_aave.201104.nc</map>
+      <map name="ROF2LND_FMAPNAME">rof/mizuRoute/gridmaps/map_HDMAmz_CONUS_TO_0.125nldas2_aave.201104.nc</map>
+    </gridmap>
+    <gridmap lnd_grid="0.125nldas2" rof_grid="MERIT_CONUSmz">
+      <map name="LND2ROF_FMAPNAME">rof/mizuRoute/gridmaps/map_0.125nldas2_TO_MERITmz_CONUS_aave.210609.nc</map>
+      <map name="ROF2LND_FMAPNAME">rof/mizuRoute/gridmaps/map_MERITmz_CONUS_TO_0.125nldas2_aave.210609.nc</map>
+    </gridmap>
+    <gridmap lnd_grid="0.125nldas2" rof_grid="USGS_GFmz">
+      <map name="LND2ROF_FMAPNAME">rof/mizuRoute/gridmaps/map_0.125nldas2_TO_USGS_GFmz_aave.201028.nc</map>
+      <map name="ROF2LND_FMAPNAME">rof/mizuRoute/gridmaps/map_USGS_GFmz_TO_0.125nldas2_aave.201028.nc</map>
+    </gridmap>
+
+    <!-- 5x5 amazon grids -->
+    <gridmap lnd_grid="5x5_amazon" rof_grid="HDMAmz_5x5_amazon">
+      <map name="LND2ROF_FMAPNAME">rof/mizuRoute/gridmaps/map_5x5_amazon_TO_HDMAmz_5x5_amazon_aave.201028.nc</map>
+      <map name="ROF2LND_FMAPNAME">rof/mizuRoute/gridmaps/map_HDMAmz_5x5_amazon_TO_5x5_amazon_aave.201028.nc</map>
+    </gridmap>
+
+</gridmaps>

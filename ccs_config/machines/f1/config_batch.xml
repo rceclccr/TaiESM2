@@ -1,0 +1,19 @@
+ <batch_system MACH="f1" type="slurm">
+    <batch_submit>sbatch</batch_submit>
+    <submit_args>
+      <argument> --time $JOB_WALLCLOCK_TIME </argument>
+      <argument> -p $JOB_QUEUE </argument>
+      <argument> --account $PROJECT </argument>
+    </submit_args>
+    <directives>
+      <directive> -o {{ job_id }}.%j.out </directive>
+      <directive> -e {{ job_id }}.%j.err </directive>
+    </directives>
+    <queues>
+      <queue walltimemax="08:00:00" nodemin="1" nodemax="10" default="true">development</queue>
+      <queue walltimemax="48:00:00" nodemin="1" nodemax="1" >ct112</queue>
+      <queue walltimemax="48:00:00" nodemin="2" nodemax="4" >ct448</queue>
+      <queue walltimemax="48:00:00" nodemin="5" nodemax="10" >ct1k</queue>
+      <queue walltimemax="48:00:00" nodemin="11" nodemax="20" >ct2k</queue>
+    </queues>
+  </batch_system>

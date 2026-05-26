@@ -1,0 +1,8 @@
+sphinx<8.0
+sphinxcontrib-programoutput
+sphinx-rtd-theme
+sphinx-copybutton
+evv4esm
+xmlschema
+sphinx-toolbox
+sphinx-autobuild

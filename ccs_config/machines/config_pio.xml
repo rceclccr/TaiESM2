@@ -1,0 +1,360 @@
+<?xml version="1.0"?>
+
+<config_pio version="1.0">
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="PIO_CONFIG_OPTS">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="PIO_ASYNC_INTERFACE">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+  <!--
+  <entry id="PIO_VERSION">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="PIO_ROOT">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="PIO_NUMTASKS">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+<!--
+  <entry id="PIO_REARRANGER">
+    <values>
+      <value>1</value>
+    </values>
+  </entry>
+-->
+
+  <entry id="PIO_REARRANGER_ATM">
+    <values>
+      <value compset="DATM">1</value>
+    </values>
+  </entry>
+
+  <entry id="PIO_REARRANGER">
+    <values>
+      <value mach="aws-hpc6a">1</value> <!-- Until we sort out the PNetCDF issue on AWS, we'll stick with NetCDF, which needs this -->
+    </values>
+  </entry>
+
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="PIO_DEBUG_LEVEL">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="PIO_BLOCKSIZE">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+
+  <entry id="PIO_BUFFER_SIZE_LIMIT">
+    <values>
+      <value compset="CAM%DEV%MT" mach="cheyenne">17108864</value>
+    </values>
+  </entry>
+
+
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="OCN_PIO_STRIDE">
+    <values>
+      <value grid="a%ne120.+oi%gx1">60</value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="OCN_PIO_ROOT">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="OCN_PIO_NUMTASKS">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="OCN_PIO_TYPENAME">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="LND_PIO_STRIDE">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="LND_PIO_ROOT">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="LND_PIO_NUMTASKS">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="LND_PIO_TYPENAME">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="ROF_PIO_STRIDE">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="ROF_PIO_ROOT">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="ROF_PIO_NUMTASKS">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="ROF_PIO_TYPENAME">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="ICE_PIO_STRIDE">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="ICE_PIO_ROOT">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="ICE_PIO_NUMTASKS">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="ICE_PIO_TYPENAME">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="ATM_PIO_STRIDE">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="ATM_PIO_ROOT">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="ATM_PIO_NUMTASKS">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <entry id="PIO_TYPENAME">
+    <values>
+      <value>pnetcdf</value>
+      <value mpilib="mpi-serial">netcdf</value>
+      <value compset="SCAM">netcdf</value>
+      <value mach="aws-hpc6a">netcdf</value> <!-- Until we sort out the PNetCDF issue on AWS, we'll stick with NetCDF -->
+    </values>
+  </entry>
+
+<!--
+  <entry id="ATM_PIO_TYPENAME">
+    <values>
+      <value compset=".*DATM.*">netcdf</value>
+    </values>
+  </entry>
+-->
+  <entry id="PIO_REARR_COMM_TYPE">
+    <values>
+      <value mpilib="mpi-serial">coll</value>
+    </values>
+  </entry>
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="CPL_PIO_STRIDE">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="CPL_PIO_ROOT">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="CPL_PIO_NUMTASKS">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="CPL_PIO_TYPENAME">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="GLC_PIO_STRIDE">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="GLC_PIO_ROOT">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="GLC_PIO_NUMTASKS">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="GLC_PIO_TYPENAME">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="WAV_PIO_STRIDE">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="WAV_PIO_ROOT">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="WAV_PIO_NUMTASKS">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+  <!--- uncomment and fill in relevant sections
+  <entry id="WAV_PIO_TYPENAME">
+    <values>
+      <value></value>
+    </values>
+  </entry>
+  -->
+
+</config_pio>
